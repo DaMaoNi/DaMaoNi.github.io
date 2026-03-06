@@ -3,23 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>节目单 - EPG Guide</title>
+    <title>央视节目单</title>
     <style>
-        :root {
-            --primary-color: #667eea;
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-color: #f7fafc;
-            --card-bg: #ffffff;
-            --text-primary: #2d3748;
-            --text-secondary: #718096;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --live-color: #f56565;
-            --live-glow: 0 0 0 3px rgba(245, 101, 101, 0.2);
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -28,918 +13,705 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            background: var(--bg-color);
-            color: var(--text-primary);
-            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        /* Header */
-        .header {
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1.5rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .header-content {
-            max-width: 1400px;
+        .container {
+            max-width: 900px;
             margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 2rem;
-            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--primary-gradient);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .control-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        select, input[type="date"] {
-            padding: 0.5rem 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.9375rem;
-            background: white;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.2s;
-            outline: none;
-        }
-
-        select:hover, input[type="date"]:hover {
-            border-color: var(--primary-color);
-        }
-
-        select:focus, input[type="date"]:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .search-box {
+            padding: 30px;
             position: relative;
         }
 
-        .search-box input {
-            padding: 0.5rem 1rem 0.5rem 2.5rem;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.9375rem;
-            width: 240px;
-            background: white;
-            transition: all 0.2s;
-            outline: none;
-        }
-
-        .search-box input:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .search-icon {
+        .header::after {
+            content: '';
             position: absolute;
-            left: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
         }
 
-        /* Main Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
         }
 
-        /* Current Time Indicator */
-        .current-time-bar {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-sm);
+        .channel-selector {
             display: flex;
+            gap: 15px;
             align-items: center;
-            justify-content: space-between;
             flex-wrap: wrap;
-            gap: 1rem;
+        }
+
+        .channel-selector label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .channel-selector select {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .channel-selector select:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .channel-selector select option {
+            background: #2a5298;
+            color: white;
+        }
+
+        .live-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .live-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+        }
+
+        .channel-info {
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .channel-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2a5298;
+            margin-bottom: 8px;
         }
 
         .now-playing {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 10px;
+            font-size: 14px;
+            color: #666;
         }
 
-        .live-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--live-color);
-            color: white;
-            padding: 0.375rem 0.875rem;
-            border-radius: 20px;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            box-shadow: var(--live-glow);
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #f5576c;
+            border-radius: 50%;
             animation: pulse 2s infinite;
         }
 
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            background: white;
-            border-radius: 50%;
-            animation: blink 1s infinite;
-        }
-
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
         }
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .live-program-name {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .current-time {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* Program List */
-        .program-list {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .program-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.25rem;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s;
-            border: 2px solid transparent;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .program-card:hover {
-            box-shadow: var(--shadow-md);
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-
-        .program-card.is-live {
-            border-color: var(--live-color);
-            box-shadow: var(--live-glow);
-        }
-
-        .program-card.is-live::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--live-color);
-        }
-
-        .program-card-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 1rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .program-time {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .time-start {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .time-end {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-
-        .program-duration {
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
-            background: var(--bg-color);
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-weight: 500;
-        }
-
-        .program-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-            line-height: 1.4;
-        }
-
-        .program-meta {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .program-type {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.625rem;
-            border-radius: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .type-news { background: #ebf8ff; color: #2b6cb0; }
-        .type-movie { background: #faf5ff; color: #6b46c1; }
-        .type-series { background: #f0fff4; color: #276749; }
-        .type-variety { background: #fffaf0; color: #c05621; }
-        .type-documentary { background: #e6fffa; color: #285e61; }
-        .type-sports { background: #fff5f5; color: #c53030; }
-        .type-other { background: #f7fafc; color: #4a5568; }
-
-        .progress-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3px;
-            background: var(--primary-gradient);
-            transition: width 1s linear;
-        }
-
-        /* Loading State */
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem 2rem;
-            gap: 1rem;
-        }
-
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid var(--border-color);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 0.9375rem;
-            color: var(--text-secondary);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-
-        .empty-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .empty-desc {
-            font-size: 0.9375rem;
-            color: var(--text-secondary);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-            padding: 1rem;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background: var(--card-bg);
-            border-radius: 16px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            transform: scale(0.9);
-            transition: transform 0.3s;
-        }
-
-        .modal-overlay.active .modal {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+        .date-navigation {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+            border-bottom: 1px solid #e0e0e0;
+            gap: 15px;
         }
 
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            width: 32px;
-            height: 32px;
+        .date-nav-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
-            background: var(--bg-color);
             border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: var(--text-secondary);
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
-        .modal-close:hover {
-            background: var(--border-color);
-            color: var(--text-primary);
+        .date-nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .modal-body {
-            padding: 1.5rem;
+        .date-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .detail-row {
-            display: flex;
-            margin-bottom: 1rem;
-            gap: 1rem;
+        .date-nav-btn.today {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
-        .detail-label {
-            min-width: 80px;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .detail-value {
-            font-size: 0.9375rem;
-            color: var(--text-primary);
+        .current-date {
             flex: 1;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2a5298;
+            padding: 0 15px;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header {
-                padding: 1rem;
-            }
-
-            .header-content {
-                gap: 1rem;
-            }
-
-            .logo-text {
-                font-size: 1.25rem;
-            }
-
-            .controls {
-                width: 100%;
-            }
-
-            .search-box input {
-                width: 100%;
-            }
-
-            .container {
-                padding: 1rem;
-            }
-
-            .current-time-bar {
-                padding: 1rem;
-            }
-
-            .program-card {
-                padding: 1rem;
-            }
-
-            .program-title {
-                font-size: 1rem;
-            }
+        .program-list {
+            padding: 20px 30px;
+            max-height: 600px;
+            overflow-y: auto;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
+        .program-list::-webkit-scrollbar {
             width: 8px;
-            height: 8px;
         }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg-color);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
+        .program-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
             border-radius: 4px;
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
+        .program-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+        }
+
+        .program-item {
+            display: flex;
+            align-items: center;
+            padding: 18px 20px;
+            margin-bottom: 12px;
+            background: white;
+            border-radius: 12px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .program-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .program-item.current {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-left-color: #f5576c;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .program-item.past {
+            opacity: 0.5;
+        }
+
+        .time-section {
+            flex-shrink: 0;
+            width: 100px;
+            margin-right: 20px;
+        }
+
+        .program-time {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2a5298;
+        }
+
+        .program-duration {
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .program-title {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .program-item.current .program-title {
+            font-weight: 600;
+            color: #2a5298;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+            color: #f5576c;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .channel-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .live-btn {
+                text-align: center;
+            }
+
+            .date-navigation {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .current-date {
+                font-size: 14px;
+            }
+
+            .program-list {
+                padding: 15px;
+            }
+
+            .program-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .time-section {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">EPG</div>
-                <span class="logo-text">节目单</span>
-            </div>
-            
-            <div class="controls">
-                <div class="control-group">
-                    <span class="control-label">频道</span>
-                    <select id="channelSelect">
-                        <option value="cctv1">CCTV-1 综合</option>
-                        <option value="cctv2">CCTV-2 财经</option>
-                        <option value="cctv3">CCTV-3 综艺</option>
-                        <option value="cctv4">CCTV-4 中文国际</option>
-                        <option value="cctv5">CCTV-5 体育</option>
-                        <option value="cctv5plus">CCTV-5+ 体育赛事</option>
-                        <option value="cctv6">CCTV-6 电影</option>
-                        <option value="cctv7">CCTV-7 军事农业</option>
-                        <option value="cctv8">CCTV-8 电视剧</option>
-                        <option value="cctv9">CCTV-9 纪录</option>
-                        <option value="cctv10">CCTV-10 科教</option>
-                        <option value="cctv11">CCTV-11 戏曲</option>
-                        <option value="cctv12">CCTV-12 社会与法</option>
-                        <option value="cctv13">CCTV-13 新闻</option>
-                        <option value="cctv14">CCTV-14 少儿</option>
-                        <option value="cctv15">CCTV-15 音乐</option>
-                        <option value="cctv16">CCTV-16 奥林匹克</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <span class="control-label">日期</span>
-                    <input type="date" id="dateSelect">
-                </div>
-                
-                <div class="search-box">
-                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                    <input type="text" id="searchInput" placeholder="搜索节目...">
-                </div>
+    <div class="container">
+        <div class="header">
+            <h1>📺 央视节目单</h1>
+            <div class="channel-selector">
+                <label for="channel">选择频道：</label>
+                <select id="channel">
+                    <option value="cctv1">CCTV-1 综合</option>
+                    <option value="cctv2">CCTV-2 财经</option>
+                    <option value="cctv3">CCTV-3 综艺</option>
+                    <option value="cctv4">CCTV-4 中文国际</option>
+                    <option value="cctv5">CCTV-5 体育</option>
+                    <option value="cctv5plus">CCTV-5+ 体育赛事</option>
+                    <option value="cctv6">CCTV-6 电影</option>
+                    <option value="cctv7">CCTV-7 国防军事</option>
+                    <option value="cctv8">CCTV-8 电视剧</option>
+                    <option value="cctv9">CCTV-9 纪录</option>
+                    <option value="cctv10">CCTV-10 科教</option>
+                    <option value="cctv11">CCTV-11 戏曲</option>
+                    <option value="cctv12">CCTV-12 社会与法</option>
+                    <option value="cctv13">CCTV-13 新闻</option>
+                    <option value="cctv14">CCTV-14 少儿</option>
+                    <option value="cctv15">CCTV-15 音乐</option>
+                    <option value="cctv16">CCTV-16 奥林匹克</option>
+                </select>
+                <a href="#" id="liveBtn" class="live-btn" target="_blank">🔴 观看直播</a>
             </div>
         </div>
-    </header>
 
-    <main class="container">
-        <!-- Current Time Bar -->
-        <div class="current-time-bar">
+        <div class="channel-info" id="channelInfo" style="display: none;">
+            <div class="channel-name" id="channelName"></div>
             <div class="now-playing">
-                <div class="live-badge">
-                    <span class="live-dot"></span>
-                    正在播出
-                </div>
-                <div class="live-program-name" id="liveProgramName">加载中...</div>
+                <span class="live-indicator"></span>
+                <span>正在播放：</span>
+                <span id="nowPlaying"></span>
             </div>
-            <div class="current-time" id="currentTime"></div>
         </div>
 
-        <!-- Program List -->
+        <div class="date-navigation">
+            <button class="date-nav-btn" id="prevDay">◀ 前一天</button>
+            <div class="current-date" id="currentDate"></div>
+            <button class="date-nav-btn" id="nextDay">后一天 ▶</button>
+            <button class="date-nav-btn today" id="todayBtn">今天</button>
+        </div>
+
         <div class="program-list" id="programList">
             <div class="loading">
-                <div class="spinner"></div>
-                <div class="loading-text">加载节目单中...</div>
+                <div class="loading-spinner"></div>
+                <div>正在加载节目单...</div>
             </div>
-        </div>
-    </main>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">节目详情</h3>
-                <button class="modal-close" id="modalClose">&times;</button>
-            </div>
-            <div class="modal-body" id="modalBody"></div>
         </div>
     </div>
 
     <script>
-        // 状态管理
-        const state = {
-            currentChannel: 'cctv1',
-            currentDate: new Date(),
-            programs: [],
-            currentProgram: null,
-            searchQuery: ''
-        };
+        // 全局变量
+        let currentData = null;
+        let currentChannel = 'cctv1';
+        let selectedDate = new Date();
 
-        // DOM 元素
-        const elements = {
-            channelSelect: document.getElementById('channelSelect'),
-            dateSelect: document.getElementById('dateSelect'),
-            searchInput: document.getElementById('searchInput'),
-            liveProgramName: document.getElementById('liveProgramName'),
-            currentTime: document.getElementById('currentTime'),
-            programList: document.getElementById('programList'),
-            modalOverlay: document.getElementById('modalOverlay'),
-            modalTitle: document.getElementById('modalTitle'),
-            modalBody: document.getElementById('modalBody'),
-            modalClose: document.getElementById('modalClose')
-        };
-
-        // 初始化
-        function init() {
-            setDefaultDate();
-            updateCurrentTime();
-            setInterval(updateCurrentTime, 1000);
-            fetchPrograms();
-            bindEvents();
+        // 格式化日期
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+            const weekDay = weekDays[date.getDay()];
+            return `${year}年${month}月${day}日 星期${weekDay}`;
         }
 
-        // 设置默认日期
-        function setDefaultDate() {
+        // 格式化日期（用于显示）
+        function formatDateShort(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+            const weekDay = weekDays[date.getDay()];
+            return `${year}-${month}-${day} 星期${weekDay}`;
+        }
+
+        // 格式化持续时间
+        function formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            if (hours > 0) {
+                return `${hours}小时${minutes}分钟`;
+            }
+            return `${minutes}分钟`;
+        }
+
+        // 获取日期字符串（用于API）
+        function getDateString(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}${month}${day}`;
+        }
+
+        // 判断是否是今天
+        function isToday(date) {
             const today = new Date();
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(today.getDate()).padStart(2, '0');
-            elements.dateSelect.value = `${year}-${month}-${day}`;
-            elements.dateSelect.min = `${year}-${month}-${day}`;
-            elements.dateSelect.max = `${year + 1}-${month}-${day}`;
+            return date.getFullYear() === today.getFullYear() &&
+                   date.getMonth() === today.getMonth() &&
+                   date.getDate() === today.getDate();
         }
 
-        // 更新当前时间
-        function updateCurrentTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            elements.currentTime.textContent = `当前时间: ${hours}:${minutes}:${seconds}`;
+        // 判断是否是未来日期
+        function isFutureDate(date) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const checkDate = new Date(date);
+            checkDate.setHours(0, 0, 0, 0);
+            return checkDate > today;
         }
 
-        // 获取节目数据
-        async function fetchPrograms() {
-            showLoading();
-            
-            const dateValue = elements.dateSelect.value;
-            const dateStr = dateValue.replace(/-/g, '');
-            const url = `https://api.cntv.cn/epg/epginfo?serviceId=tvcctv&c=${state.currentChannel}&d=${dateStr}&t=json`;
-            
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                const channelData = data[state.currentChannel];
-                
-                if (channelData && channelData.program) {
-                    state.programs = channelData.program;
-                    state.currentProgram = {
-                        name: channelData.isLive,
-                        startTime: channelData.liveSt
-                    };
-                    elements.liveProgramName.textContent = channelData.isLive;
-                    renderProgramList();
-                    
-                    // 数据加载并渲染完成后，执行定位
-                    scrollToCurrentProgram();
-                } else {
-                    showEmpty();
-                }
-            } catch (error) {
-                console.error('获取节目单失败:', error);
-                showError();
+        // 判断节目是否正在播放
+        function isCurrentlyPlaying(program, liveSt) {
+            return program.st === liveSt;
+        }
+
+        // 判断节目是否已经播放过
+        function isPastProgram(program) {
+            const now = Math.floor(Date.now() / 1000);
+            return program.et < now;
+        }
+
+        // 更新日期显示和按钮状态
+        function updateDateDisplay() {
+            const currentDateEl = document.getElementById('currentDate');
+            const prevDayBtn = document.getElementById('prevDay');
+            const nextDayBtn = document.getElementById('nextDay');
+            const todayBtn = document.getElementById('todayBtn');
+
+            currentDateEl.textContent = formatDateShort(selectedDate);
+
+            // 禁用未来日期的按钮
+            if (isFutureDate(selectedDate)) {
+                nextDayBtn.disabled = true;
+            } else {
+                nextDayBtn.disabled = false;
+            }
+
+            // 如果是今天，隐藏"今天"按钮，否则显示
+            if (isToday(selectedDate)) {
+                todayBtn.style.display = 'none';
+            } else {
+                todayBtn.style.display = 'block';
             }
         }
 
-        // 判断节目类型
-        function getProgramType(title) {
-            if (title.includes('新闻') || title.includes('联播')) return 'news';
-            if (title.includes('电视剧') || title.includes('第') && title.includes('集')) return 'series';
-            if (title.includes('电影')) return 'movie';
-            if (title.includes('综艺') || title.includes('晚会')) return 'variety';
-            if (title.includes('纪录') || title.includes('探索')) return 'documentary';
-            if (title.includes('体育') || title.includes('比赛') || title.includes('直播') || title.includes('奥林匹克')) return 'sports';
-            return 'other';
+        // 加载节目单数据
+        async function loadEPG(channel, date) {
+            const programList = document.getElementById('programList');
+            const channelInfo = document.getElementById('channelInfo');
+            const liveBtn = document.getElementById('liveBtn');
+            
+            programList.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>正在加载节目单...</div>
+                </div>
+            `;
+
+            const dateStr = getDateString(date);
+            const apiUrl = `https://api.cntv.cn/epg/epginfo?serviceId=tvcctv&c=${channel}&d=${dateStr}&t=json`;
+
+            try {
+                // 使用 JSONP 方式请求数据（因为可能有跨域限制）
+                const data = await fetchEPGData(apiUrl, channel);
+                
+                if (data && data[channel]) {
+                    currentData = data[channel];
+                    renderProgramList(currentData, date);
+                } else {
+                    throw new Error('数据格式错误');
+                }
+            } catch (error) {
+                console.error('加载失败:', error);
+                programList.innerHTML = `
+                    <div class="error">
+                        <div style="font-size: 48px; margin-bottom: 15px;">😕</div>
+                        <div>加载节目单失败，请稍后重试</div>
+                        <div style="margin-top: 10px; font-size: 12px; color: #999;">${error.message}</div>
+                    </div>
+                `;
+                channelInfo.style.display = 'none';
+            }
         }
 
-        // 获取类型名称
-        function getTypeName(type) {
-            const names = {
-                news: '新闻',
-                series: '电视剧',
-                movie: '电影',
-                variety: '综艺',
-                documentary: '纪录片',
-                sports: '体育',
-                other: '其他'
-            };
-            return names[type] || '其他';
+        // 通过JSONP获取数据
+        function fetchEPGData(url, channel) {
+            return new Promise((resolve, reject) => {
+                // 创建一个唯一的回调函数名
+                const callbackName = `epgCallback_${Date.now()}`;
+                
+                // 创建script标签
+                const script = document.createElement('script');
+                script.src = `${url}&callback=${callbackName}`;
+                
+                // 定义回调函数
+                window[callbackName] = function(data) {
+                    resolve(data);
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                };
+                
+                // 错误处理
+                script.onerror = function() {
+                    reject(new Error('网络请求失败'));
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                };
+                
+                // 设置超时
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        reject(new Error('请求超时'));
+                        delete window[callbackName];
+                        document.body.removeChild(script);
+                    }
+                }, 10000);
+                
+                document.body.appendChild(script);
+            });
         }
 
         // 渲染节目列表
-        function renderProgramList() {
-            const filtered = filterPrograms();
+        function renderProgramList(data, date) {
+            const programList = document.getElementById('programList');
+            const channelInfo = document.getElementById('channelInfo');
+            const channelName = document.getElementById('channelName');
+            const nowPlaying = document.getElementById('nowPlaying');
+            const liveBtn = document.getElementById('liveBtn');
+
+            // 更新频道信息
+            channelName.textContent = data.channelName;
             
-            if (filtered.length === 0) {
-                elements.programList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📺</div>
-                        <div class="empty-title">未找到节目</div>
-                        <div class="empty-desc">尝试调整搜索关键词</div>
-                    </div>
-                `;
-                return;
+            // 设置直播链接
+            if (data.lvUrl) {
+                liveBtn.href = data.lvUrl;
+                liveBtn.style.display = 'inline-block';
+            } else {
+                liveBtn.style.display = 'none';
             }
 
-            const now = new Date();
-            const today = elements.dateSelect.value === now.toISOString().split('T')[0];
-            const currentTime = now.getTime() / 1000;
+            // 只有今天才显示正在播放
+            const isDateToday = isToday(date);
+            if (isDateToday) {
+                nowPlaying.textContent = data.isLive || '暂无信息';
+                document.querySelector('.now-playing').style.display = 'flex';
+            } else {
+                document.querySelector('.now-playing').style.display = 'none';
+            }
 
-            let html = '';
-            filtered.forEach(program => {
-                const startTime = new Date(program.st * 1000);
-                const endTime = new Date(program.et * 1000);
-                const isLive = today && program.st <= currentTime && program.et > currentTime;
-                const type = getProgramType(program.t);
-                
-                const startStr = formatTime(startTime);
-                const endStr = formatTime(endTime);
-                const duration = Math.round((program.et - program.st) / 60);
-                
-                let progressHTML = '';
-                if (isLive) {
-                    const progress = ((currentTime - program.st) / (program.et - program.st)) * 100;
-                    progressHTML = `<div class="progress-bar" style="width: ${progress}%"></div>`;
+            // 显示频道信息
+            channelInfo.style.display = 'block';
+
+            // 渲染节目列表
+            if (data.program && data.program.length > 0) {
+                let html = '';
+                let currentProgramIndex = -1;
+
+                // 只有今天才找到当前正在播放的节目索引
+                if (isDateToday) {
+                    data.program.forEach((program, index) => {
+                        if (isCurrentlyPlaying(program, data.liveSt)) {
+                            currentProgramIndex = index;
+                        }
+                    });
                 }
 
-                html += `
-                    <div class="program-card ${isLive ? 'is-live' : ''}" data-program='${JSON.stringify(program)}'>
-                        <div class="program-card-header">
-                            <div class="program-time">
-                                <span class="time-start">${startStr}</span>
-                                <span class="time-end">- ${endStr}</span>
+                data.program.forEach((program, index) => {
+                    const isCurrent = index === currentProgramIndex;
+                    let isPast = false;
+                    
+                    // 只有今天才判断是否已播放
+                    if (isDateToday) {
+                        isPast = isPastProgram(program);
+                    }
+                    
+                    let itemClass = 'program-item';
+                    if (isCurrent) itemClass += ' current';
+                    else if (isPast) itemClass += ' past';
+
+                    const duration = formatDuration(program.duration);
+
+                    html += `
+                        <div class="${itemClass}" id="program-${index}">
+                            <div class="time-section">
+                                <div class="program-time">${program.showTime}</div>
+                                <div class="program-duration">${duration}</div>
                             </div>
-                            <span class="program-duration">${duration} 分钟</span>
+                            <div class="program-title">${program.t}</div>
                         </div>
-                        <div class="program-title">${program.t}</div>
-                        <div class="program-meta">
-                            <span class="program-type type-${type}">${getTypeName(type)}</span>
-                            ${isLive ? '<span class="live-badge"><span class="live-dot"></span>正在播出</span>' : ''}
-                        </div>
-                        ${progressHTML}
+                    `;
+                });
+
+                programList.innerHTML = html;
+
+                // 滚动到当前播放的节目（仅今天）
+                if (isDateToday && currentProgramIndex >= 0) {
+                    setTimeout(() => {
+                        const currentElement = document.getElementById(`program-${currentProgramIndex}`);
+                        if (currentElement) {
+                            currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
+                } else {
+                    // 非今天，滚动到顶部
+                    setTimeout(() => {
+                        programList.scrollTop = 0;
+                    }, 100);
+                }
+            } else {
+                programList.innerHTML = `
+                    <div class="error">
+                        <div style="font-size: 48px; margin-bottom: 15px;">📭</div>
+                        <div>暂无节目信息</div>
                     </div>
                 `;
-            });
-
-            elements.programList.innerHTML = html;
-
-            // 添加点击事件
-            elements.programList.querySelectorAll('.program-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    const program = JSON.parse(card.dataset.program);
-                    showProgramDetail(program);
-                });
-            });
-        }
-        
-        // 自动定位到当前播放节目
-        function scrollToCurrentProgram() {
-            // 只有在查看今天日期时才定位
-            const today = new Date().toISOString().split('T')[0];
-            if (elements.dateSelect.value !== today) return;
-
-            const liveCard = document.querySelector('.program-card.is-live');
-            if (liveCard) {
-                // 使用 setTimeout 确保 DOM 完全渲染和浏览器布局计算完成
-                setTimeout(() => {
-                    liveCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
             }
         }
 
-        // 过滤节目
-        function filterPrograms() {
-            if (!state.searchQuery) return state.programs;
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            const channelSelect = document.getElementById('channel');
+            const prevDayBtn = document.getElementById('prevDay');
+            const nextDayBtn = document.getElementById('nextDay');
+            const todayBtn = document.getElementById('todayBtn');
             
-            const query = state.searchQuery.toLowerCase();
-            return state.programs.filter(p => 
-                p.t.toLowerCase().includes(query)
-            );
-        }
+            // 初始化日期显示
+            updateDateDisplay();
 
-        // 格式化时间
-        function formatTime(date) {
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${hours}:${minutes}`;
-        }
+            // 加载默认频道
+            loadEPG(currentChannel, selectedDate);
 
-        // 显示节目详情
-        function showProgramDetail(program) {
-            const startTime = new Date(program.st * 1000);
-            const endTime = new Date(program.et * 1000);
-            const type = getProgramType(program.t);
-            const duration = Math.round((program.et - program.st) / 60);
-
-            elements.modalTitle.textContent = program.t;
-            elements.modalBody.innerHTML = `
-                <div class="detail-row">
-                    <span class="detail-label">播出时间</span>
-                    <span class="detail-value">${formatTime(startTime)} - ${formatTime(endTime)}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">时长</span>
-                    <span class="detail-value">${duration} 分钟</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">类型</span>
-                    <span class="detail-value">
-                        <span class="program-type type-${type}">${getTypeName(type)}</span>
-                    </span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">节目名称</span>
-                    <span class="detail-value">${program.t}</span>
-                </div>
-                ${program.eventId ? `
-                <div class="detail-row">
-                    <span class="detail-label">事件ID</span>
-                    <span class="detail-value">${program.eventId}</span>
-                </div>
-                ` : ''}
-            `;
-            
-            elements.modalOverlay.classList.add('active');
-        }
-
-        // 显示加载状态
-        function showLoading() {
-            elements.programList.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div class="loading-text">加载节目单中...</div>
-                </div>
-            `;
-        }
-
-        // 显示空状态
-        function showEmpty() {
-            elements.programList.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📺</div>
-                    <div class="empty-title">暂无节目数据</div>
-                    <div class="empty-desc">请尝试选择其他日期或频道</div>
-                </div>
-            `;
-        }
-
-        // 显示错误
-        function showError() {
-            elements.programList.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">⚠️</div>
-                    <div class="empty-title">加载失败</div>
-                    <div class="empty-desc">请检查网络连接后重试</div>
-                </div>
-            `;
-        }
-
-        // 绑定事件
-        function bindEvents() {
-            // 频道选择
-            elements.channelSelect.addEventListener('change', (e) => {
-                state.currentChannel = e.target.value;
-                fetchPrograms();
+            // 频道切换事件
+            channelSelect.addEventListener('change', function() {
+                currentChannel = this.value;
+                loadEPG(currentChannel, selectedDate);
             });
 
-            // 日期选择
-            elements.dateSelect.addEventListener('change', () => {
-                fetchPrograms();
+            // 前一天
+            prevDayBtn.addEventListener('click', function() {
+                selectedDate.setDate(selectedDate.getDate() - 1);
+                updateDateDisplay();
+                loadEPG(currentChannel, selectedDate);
             });
 
-            // 搜索
-            elements.searchInput.addEventListener('input', (e) => {
-                state.searchQuery = e.target.value;
-                renderProgramList();
-            });
-
-            // 关闭模态框
-            elements.modalClose.addEventListener('click', () => {
-                elements.modalOverlay.classList.remove('active');
-            });
-
-            elements.modalOverlay.addEventListener('click', (e) => {
-                if (e.target === elements.modalOverlay) {
-                    elements.modalOverlay.classList.remove('active');
+            // 后一天
+            nextDayBtn.addEventListener('click', function() {
+                if (!isFutureDate(selectedDate)) {
+                    selectedDate.setDate(selectedDate.getDate() + 1);
+                    updateDateDisplay();
+                    loadEPG(currentChannel, selectedDate);
                 }
             });
 
-            // 键盘事件
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && elements.modalOverlay.classList.contains('active')) {
-                    elements.modalOverlay.classList.remove('active');
-                }
+            // 今天
+            todayBtn.addEventListener('click', function() {
+                selectedDate = new Date();
+                updateDateDisplay();
+                loadEPG(currentChannel, selectedDate);
             });
-        }
-
-        // 启动应用
-        init();
+        });
     </script>
 </body>
 </html>
