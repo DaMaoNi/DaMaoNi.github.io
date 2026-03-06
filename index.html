@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>节目单 - EPG Guide</title>
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --live-color: #f56565;
+            --live-glow: 0 0 0 3px rgba(245, 101, 101, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        select, input[type="date"] {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            background: white;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        select:hover, input[type="date"]:hover {
+            border-color: var(--primary-color);
+        }
+
+        select:focus, input[type="date"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            width: 240px;
+            background: white;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Current Time Indicator */
+        .current-time-bar {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .now-playing {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--live-color);
+            color: white;
+            padding: 0.375rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            box-shadow: var(--live-glow);
+            animation: pulse 2s infinite;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .live-program-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .current-time {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Timeline */
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .view-toggle {
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 0.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .view-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .view-btn.active {
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Timeline Grid */
+        .timeline-grid {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            overflow-x: auto;
+            scroll-behavior: smooth; /* 平滑滚动 */
+        }
+
+        .time-labels {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 0;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            min-width: 1200px;
+        }
+
+        .time-label {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .time-bars {
+            position: relative;
+            min-width: 1200px;
+            height: 60px;
+        }
+
+        .time-bar {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding: 0 0.75rem;
+            font-size: 0.8125rem;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .time-bar:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .time-bar.news { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
+        .time-bar.movie { background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%); }
+        .time-bar.series { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+        .time-bar.variety { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
+        .time-bar.documentary { background: linear-gradient(135deg, #38b2ac 0%, #319795 100%); }
+        .time-bar.sports { background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); }
+        .time-bar.other { background: linear-gradient(135deg, #a0aec0 0%, #718096 100%); }
+
+        .current-time-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--live-color);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .current-time-line::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            width: 10px;
+            height: 10px;
+            background: var(--live-color);
+            border-radius: 50%;
+        }
+
+        /* Program List */
+        .program-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .program-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .program-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .program-card.is-live {
+            border-color: var(--live-color);
+            box-shadow: var(--live-glow);
+        }
+
+        .program-card.is-live::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--live-color);
+        }
+
+        .program-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .program-time {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .time-start {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .time-end {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .program-duration {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            background: var(--bg-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .program-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .program-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .program-type {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .type-news { background: #ebf8ff; color: #2b6cb0; }
+        .type-movie { background: #faf5ff; color: #6b46c1; }
+        .type-series { background: #f0fff4; color: #276749; }
+        .type-variety { background: #fffaf0; color: #c05621; }
+        .type-documentary { background: #e6fffa; color: #285e61; }
+        .type-sports { background: #fff5f5; color: #c53030; }
+        .type-other { background: #f7fafc; color: #4a5568; }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            transition: width 1s linear;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-desc {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--bg-color);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .detail-label {
+            min-width: 80px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 0.9375rem;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header-content {
+                gap: 1rem;
+            }
+
+            .logo-text {
+                font-size: 1.25rem;
+            }
+
+            .controls {
+                width: 100%;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .current-time-bar {
+                padding: 1rem;
+            }
+
+            .program-card {
+                padding: 1rem;
+            }
+
+            .program-title {
+                font-size: 1rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">EPG</div>
+                <span class="logo-text">节目单</span>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <span class="control-label">频道</span>
+                    <select id="channelSelect">
+                        <option value="cctv1">CCTV-1 综合</option>
+                        <option value="cctv2">CCTV-2 财经</option>
+                        <option value="cctv3">CCTV-3 综艺</option>
+                        <option value="cctv4">CCTV-4 中文国际</option>
+                        <option value="cctv5">CCTV-5 体育</option>
+                        <option value="cctv5plus">CCTV-5+ 体育赛事</option>
+                        <option value="cctv6">CCTV-6 电影</option>
+                        <option value="cctv7">CCTV-7 军事农业</option>
+                        <option value="cctv8">CCTV-8 电视剧</option>
+                        <option value="cctv9">CCTV-9 纪录</option>
+                        <option value="cctv10">CCTV-10 科教</option>
+                        <option value="cctv11">CCTV-11 戏曲</option>
+                        <option value="cctv12">CCTV-12 社会与法</option>
+                        <option value="cctv13">CCTV-13 新闻</option>
+                        <option value="cctv14">CCTV-14 少儿</option>
+                        <option value="cctv15">CCTV-15 音乐</option>
+                        <option value="cctv16">CCTV-16 奥林匹克</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <span class="control-label">日期</span>
+                    <input type="date" id="dateSelect">
+                </div>
+                
+                <div class="search-box">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="搜索节目...">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Current Time Bar -->
+        <div class="current-time-bar">
+            <div class="now-playing">
+                <div class="live-badge">
+                    <span class="live-dot"></span>
+                    正在播出
+                </div>
+                <div class="live-program-name" id="liveProgramName">加载中...</div>
+            </div>
+            <div class="current-time" id="currentTime"></div>
+        </div>
+
+        <!-- Timeline View -->
+        <div class="timeline-header">
+            <h2 class="timeline-title">时间轴视图</h2>
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="timeline">时间轴</button>
+                <button class="view-btn" data-view="list">列表</button>
+            </div>
+        </div>
+
+        <div class="timeline-grid" id="timelineView">
+            <div class="time-labels" id="timeLabels"></div>
+            <div class="time-bars" id="timeBars"></div>
+        </div>
+
+        <!-- Program List -->
+        <div class="program-list" id="programList">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div class="loading-text">加载节目单中...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">节目详情</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // 状态管理
+        const state = {
+            currentChannel: 'cctv1',
+            currentDate: new Date(),
+            programs: [],
+            currentProgram: null,
+            searchQuery: '',
+            viewMode: 'timeline'
+        };
+
+        // DOM 元素
+        const elements = {
+            channelSelect: document.getElementById('channelSelect'),
+            dateSelect: document.getElementById('dateSelect'),
+            searchInput: document.getElementById('searchInput'),
+            liveProgramName: document.getElementById('liveProgramName'),
+            currentTime: document.getElementById('currentTime'),
+            timeLabels: document.getElementById('timeLabels'),
+            timeBars: document.getElementById('timeBars'),
+            programList: document.getElementById('programList'),
+            timelineView: document.getElementById('timelineView'),
+            modalOverlay: document.getElementById('modalOverlay'),
+            modalTitle: document.getElementById('modalTitle'),
+            modalBody: document.getElementById('modalBody'),
+            modalClose: document.getElementById('modalClose'),
+            viewBtns: document.querySelectorAll('.view-btn')
+        };
+
+        // 初始化
+        function init() {
+            setDefaultDate();
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 1000);
+            fetchPrograms();
+            bindEvents();
+        }
+
+        // 设置默认日期
+        function setDefaultDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            elements.dateSelect.value = `${year}-${month}-${day}`;
+            elements.dateSelect.min = `${year}-${month}-${day}`;
+            elements.dateSelect.max = `${year + 1}-${month}-${day}`;
+        }
+
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            elements.currentTime.textContent = `当前时间: ${hours}:${minutes}:${seconds}`;
+        }
+
+        // 获取节目数据
+        async function fetchPrograms() {
+            showLoading();
+            
+            const dateValue = elements.dateSelect.value;
+            const dateStr = dateValue.replace(/-/g, '');
+            const url = `https://api.cntv.cn/epg/epginfo?serviceId=tvcctv&c=${state.currentChannel}&d=${dateStr}&t=json`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const channelData = data[state.currentChannel];
+                
+                if (channelData && channelData.program) {
+                    state.programs = channelData.program;
+                    state.currentProgram = {
+                        name: channelData.isLive,
+                        startTime: channelData.liveSt
+                    };
+                    elements.liveProgramName.textContent = channelData.isLive;
+                    renderTimeline();
+                    renderProgramList();
+                    
+                    // 数据加载并渲染完成后，执行定位
+                    scrollToCurrentProgram();
+                } else {
+                    showEmpty();
+                }
+            } catch (error) {
+                console.error('获取节目单失败:', error);
+                showError();
+            }
+        }
+
+        // 判断节目类型
+        function getProgramType(title) {
+            if (title.includes('新闻') || title.includes('联播')) return 'news';
+            if (title.includes('电视剧') || title.includes('第') && title.includes('集')) return 'series';
+            if (title.includes('电影')) return 'movie';
+            if (title.includes('综艺') || title.includes('晚会')) return 'variety';
+            if (title.includes('纪录') || title.includes('探索')) return 'documentary';
+            if (title.includes('体育') || title.includes('比赛') || title.includes('直播') || title.includes('奥林匹克')) return 'sports';
+            return 'other';
+        }
+
+        // 获取类型名称
+        function getTypeName(type) {
+            const names = {
+                news: '新闻',
+                series: '电视剧',
+                movie: '电影',
+                variety: '综艺',
+                documentary: '纪录片',
+                sports: '体育',
+                other: '其他'
+            };
+            return names[type] || '其他';
+        }
+
+        // 渲染时间轴
+        function renderTimeline() {
+            // 渲染时间标签
+            let labelsHTML = '';
+            for (let i = 0; i < 24; i++) {
+                labelsHTML += `<div class="time-label">${String(i).padStart(2, '0')}:00</div>`;
+            }
+            elements.timeLabels.innerHTML = labelsHTML;
+
+            // 渲染节目条
+            const dayStart = new Date(elements.dateSelect.value);
+            dayStart.setHours(0, 0, 0, 0);
+            const dayStartTime = dayStart.getTime() / 1000;
+            const dayEndSeconds = 24 * 3600;
+
+            let barsHTML = '';
+            state.programs.forEach(program => {
+                const startOffset = program.st - dayStartTime;
+                const duration = program.et - program.st;
+                const left = (startOffset / dayEndSeconds) * 100;
+                const width = (duration / dayEndSeconds) * 100;
+                const type = getProgramType(program.t);
+                
+                barsHTML += `
+                    <div class="time-bar ${type}" 
+                         style="left: ${left}%; width: ${width}%;"
+                         data-program='${JSON.stringify(program)}'
+                         title="${program.t}">
+                        ${program.t}
+                    </div>
+                `;
+            });
+
+            // 添加当前时间线
+            const now = new Date();
+            if (elements.dateSelect.value === now.toISOString().split('T')[0]) {
+                const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                const currentLeft = (currentSeconds / dayEndSeconds) * 100;
+                barsHTML += `<div class="current-time-line" style="left: ${currentLeft}%"></div>`;
+            }
+
+            elements.timeBars.innerHTML = barsHTML;
+
+            // 添加点击事件
+            elements.timeBars.querySelectorAll('.time-bar').forEach(bar => {
+                bar.addEventListener('click', () => {
+                    const program = JSON.parse(bar.dataset.program);
+                    showProgramDetail(program);
+                });
+            });
+        }
+
+        // 渲染节目列表
+        function renderProgramList() {
+            const filtered = filterPrograms();
+            
+            if (filtered.length === 0) {
+                elements.programList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📺</div>
+                        <div class="empty-title">未找到节目</div>
+                        <div class="empty-desc">尝试调整搜索关键词</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const now = new Date();
+            const today = elements.dateSelect.value === now.toISOString().split('T')[0];
+            const currentTime = now.getTime() / 1000;
+
+            let html = '';
+            filtered.forEach(program => {
+                const startTime = new Date(program.st * 1000);
+                const endTime = new Date(program.et * 1000);
+                const isLive = today && program.st <= currentTime && program.et > currentTime;
+                const type = getProgramType(program.t);
+                
+                const startStr = formatTime(startTime);
+                const endStr = formatTime(endTime);
+                const duration = Math.round((program.et - program.st) / 60);
+                
+                let progressHTML = '';
+                if (isLive) {
+                    const progress = ((currentTime - program.st) / (program.et - program.st)) * 100;
+                    progressHTML = `<div class="progress-bar" style="width: ${progress}%"></div>`;
+                }
+
+                html += `
+                    <div class="program-card ${isLive ? 'is-live' : ''}" data-program='${JSON.stringify(program)}'>
+                        <div class="program-card-header">
+                            <div class="program-time">
+                                <span class="time-start">${startStr}</span>
+                                <span class="time-end">- ${endStr}</span>
+                            </div>
+                            <span class="program-duration">${duration} 分钟</span>
+                        </div>
+                        <div class="program-title">${program.t}</div>
+                        <div class="program-meta">
+                            <span class="program-type type-${type}">${getTypeName(type)}</span>
+                            ${isLive ? '<span class="live-badge"><span class="live-dot"></span>正在播出</span>' : ''}
+                        </div>
+                        ${progressHTML}
+                    </div>
+                `;
+            });
+
+            elements.programList.innerHTML = html;
+
+            // 添加点击事件
+            elements.programList.querySelectorAll('.program-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const program = JSON.parse(card.dataset.program);
+                    showProgramDetail(program);
+                });
+            });
+        }
+        
+        // 自动定位到当前播放节目
+        function scrollToCurrentProgram() {
+            // 只有在查看今天日期时才定位
+            const today = new Date().toISOString().split('T')[0];
+            if (elements.dateSelect.value !== today) return;
+
+            // 1. 列表视图定位
+            const liveCard = document.querySelector('.program-card.is-live');
+            if (liveCard) {
+                // 使用 setTimeout 确保 DOM 完全渲染和浏览器布局计算完成
+                setTimeout(() => {
+                    liveCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+
+            // 2. 时间轴视图定位
+            const timeLine = document.querySelector('.current-time-line');
+            if (timeLine && state.viewMode === 'timeline') {
+                 setTimeout(() => {
+                    const container = elements.timelineView;
+                    // 计算滚动位置：当前时间线的位置 - 容器宽度的一半
+                    const scrollLeftPosition = timeLine.offsetLeft - container.clientWidth / 2;
+                    
+                    container.scrollTo({
+                        left: Math.max(0, scrollLeftPosition), // 防止负数
+                        behavior: 'smooth'
+                    });
+                }, 100);
+            }
+        }
+
+        // 过滤节目
+        function filterPrograms() {
+            if (!state.searchQuery) return state.programs;
+            
+            const query = state.searchQuery.toLowerCase();
+            return state.programs.filter(p => 
+                p.t.toLowerCase().includes(query)
+            );
+        }
+
+        // 格式化时间
+        function formatTime(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        // 显示节目详情
+        function showProgramDetail(program) {
+            const startTime = new Date(program.st * 1000);
+            const endTime = new Date(program.et * 1000);
+            const type = getProgramType(program.t);
+            const duration = Math.round((program.et - program.st) / 60);
+
+            elements.modalTitle.textContent = program.t;
+            elements.modalBody.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">播出时间</span>
+                    <span class="detail-value">${formatTime(startTime)} - ${formatTime(endTime)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">时长</span>
+                    <span class="detail-value">${duration} 分钟</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">类型</span>
+                    <span class="detail-value">
+                        <span class="program-type type-${type}">${getTypeName(type)}</span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">节目名称</span>
+                    <span class="detail-value">${program.t}</span>
+                </div>
+                ${program.eventId ? `
+                <div class="detail-row">
+                    <span class="detail-label">事件ID</span>
+                    <span class="detail-value">${program.eventId}</span>
+                </div>
+                ` : ''}
+            `;
+            
+            elements.modalOverlay.classList.add('active');
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            elements.programList.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">加载节目单中...</div>
+                </div>
+            `;
+        }
+
+        // 显示空状态
+        function showEmpty() {
+            elements.programList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📺</div>
+                    <div class="empty-title">暂无节目数据</div>
+                    <div class="empty-desc">请尝试选择其他日期或频道</div>
+                </div>
+            `;
+        }
+
+        // 显示错误
+        function showError() {
+            elements.programList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">⚠️</div>
+                    <div class="empty-title">加载失败</div>
+                    <div class="empty-desc">请检查网络连接后重试</div>
+                </div>
+            `;
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            // 频道选择
+            elements.channelSelect.addEventListener('change', (e) => {
+                state.currentChannel = e.target.value;
+                fetchPrograms();
+            });
+
+            // 日期选择
+            elements.dateSelect.addEventListener('change', () => {
+                fetchPrograms();
+            });
+
+            // 搜索
+            elements.searchInput.addEventListener('input', (e) => {
+                state.searchQuery = e.target.value;
+                renderProgramList();
+            });
+
+            // 视图切换
+            elements.viewBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    elements.viewBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.viewMode = btn.dataset.view;
+                    
+                    if (state.viewMode === 'timeline') {
+                        elements.timelineView.style.display = 'block';
+                    } else {
+                        elements.timelineView.style.display = 'none';
+                    }
+                });
+            });
+
+            // 关闭模态框
+            elements.modalClose.addEventListener('click', () => {
+                elements.modalOverlay.classList.remove('active');
+            });
+
+            elements.modalOverlay.addEventListener('click', (e) => {
+                if (e.target === elements.modalOverlay) {
+                    elements.modalOverlay.classList.remove('active');
+                }
+            });
+
+            // 键盘事件
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && elements.modalOverlay.classList.contains('active')) {
+                    elements.modalOverlay.classList.remove('active');
+                }
+            });
+        }
+
+        // 启动应用
+        init();
+    </script>
+</body>
+</html>
