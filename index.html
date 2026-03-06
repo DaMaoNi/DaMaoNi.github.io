@@ -221,130 +221,6 @@
             font-weight: 500;
         }
 
-        /* Timeline */
-        .timeline-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .timeline-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .view-toggle {
-            display: flex;
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 0.25rem;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .view-btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            background: transparent;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text-secondary);
-        }
-
-        .view-btn.active {
-            background: var(--primary-gradient);
-            color: white;
-            font-weight: 600;
-        }
-
-        /* Timeline Grid */
-        .timeline-grid {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-md);
-            overflow-x: auto;
-            scroll-behavior: smooth; /* 平滑滚动 */
-        }
-
-        .time-labels {
-            display: grid;
-            grid-template-columns: repeat(24, 1fr);
-            gap: 0;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--border-color);
-            min-width: 1200px;
-        }
-
-        .time-label {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .time-bars {
-            position: relative;
-            min-width: 1200px;
-            height: 60px;
-        }
-
-        .time-bar {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            padding: 0 0.75rem;
-            font-size: 0.8125rem;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .time-bar:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .time-bar.news { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
-        .time-bar.movie { background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%); }
-        .time-bar.series { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
-        .time-bar.variety { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
-        .time-bar.documentary { background: linear-gradient(135deg, #38b2ac 0%, #319795 100%); }
-        .time-bar.sports { background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); }
-        .time-bar.other { background: linear-gradient(135deg, #a0aec0 0%, #718096 100%); }
-
-        .current-time-line {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--live-color);
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        .current-time-line::before {
-            content: '';
-            position: absolute;
-            top: -4px;
-            left: -4px;
-            width: 10px;
-            height: 10px;
-            background: var(--live-color);
-            border-radius: 50%;
-        }
-
         /* Program List */
         .program-list {
             display: grid;
@@ -725,20 +601,6 @@
             <div class="current-time" id="currentTime"></div>
         </div>
 
-        <!-- Timeline View -->
-        <div class="timeline-header">
-            <h2 class="timeline-title">时间轴视图</h2>
-            <div class="view-toggle">
-                <button class="view-btn active" data-view="timeline">时间轴</button>
-                <button class="view-btn" data-view="list">列表</button>
-            </div>
-        </div>
-
-        <div class="timeline-grid" id="timelineView">
-            <div class="time-labels" id="timeLabels"></div>
-            <div class="time-bars" id="timeBars"></div>
-        </div>
-
         <!-- Program List -->
         <div class="program-list" id="programList">
             <div class="loading">
@@ -766,8 +628,7 @@
             currentDate: new Date(),
             programs: [],
             currentProgram: null,
-            searchQuery: '',
-            viewMode: 'timeline'
+            searchQuery: ''
         };
 
         // DOM 元素
@@ -777,15 +638,11 @@
             searchInput: document.getElementById('searchInput'),
             liveProgramName: document.getElementById('liveProgramName'),
             currentTime: document.getElementById('currentTime'),
-            timeLabels: document.getElementById('timeLabels'),
-            timeBars: document.getElementById('timeBars'),
             programList: document.getElementById('programList'),
-            timelineView: document.getElementById('timelineView'),
             modalOverlay: document.getElementById('modalOverlay'),
             modalTitle: document.getElementById('modalTitle'),
             modalBody: document.getElementById('modalBody'),
-            modalClose: document.getElementById('modalClose'),
-            viewBtns: document.querySelectorAll('.view-btn')
+            modalClose: document.getElementById('modalClose')
         };
 
         // 初始化
@@ -837,7 +694,6 @@
                         startTime: channelData.liveSt
                     };
                     elements.liveProgramName.textContent = channelData.isLive;
-                    renderTimeline();
                     renderProgramList();
                     
                     // 数据加载并渲染完成后，执行定位
@@ -874,58 +730,6 @@
                 other: '其他'
             };
             return names[type] || '其他';
-        }
-
-        // 渲染时间轴
-        function renderTimeline() {
-            // 渲染时间标签
-            let labelsHTML = '';
-            for (let i = 0; i < 24; i++) {
-                labelsHTML += `<div class="time-label">${String(i).padStart(2, '0')}:00</div>`;
-            }
-            elements.timeLabels.innerHTML = labelsHTML;
-
-            // 渲染节目条
-            const dayStart = new Date(elements.dateSelect.value);
-            dayStart.setHours(0, 0, 0, 0);
-            const dayStartTime = dayStart.getTime() / 1000;
-            const dayEndSeconds = 24 * 3600;
-
-            let barsHTML = '';
-            state.programs.forEach(program => {
-                const startOffset = program.st - dayStartTime;
-                const duration = program.et - program.st;
-                const left = (startOffset / dayEndSeconds) * 100;
-                const width = (duration / dayEndSeconds) * 100;
-                const type = getProgramType(program.t);
-                
-                barsHTML += `
-                    <div class="time-bar ${type}" 
-                         style="left: ${left}%; width: ${width}%;"
-                         data-program='${JSON.stringify(program)}'
-                         title="${program.t}">
-                        ${program.t}
-                    </div>
-                `;
-            });
-
-            // 添加当前时间线
-            const now = new Date();
-            if (elements.dateSelect.value === now.toISOString().split('T')[0]) {
-                const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-                const currentLeft = (currentSeconds / dayEndSeconds) * 100;
-                barsHTML += `<div class="current-time-line" style="left: ${currentLeft}%"></div>`;
-            }
-
-            elements.timeBars.innerHTML = barsHTML;
-
-            // 添加点击事件
-            elements.timeBars.querySelectorAll('.time-bar').forEach(bar => {
-                bar.addEventListener('click', () => {
-                    const program = JSON.parse(bar.dataset.program);
-                    showProgramDetail(program);
-                });
-            });
         }
 
         // 渲染节目列表
@@ -1000,27 +804,11 @@
             const today = new Date().toISOString().split('T')[0];
             if (elements.dateSelect.value !== today) return;
 
-            // 1. 列表视图定位
             const liveCard = document.querySelector('.program-card.is-live');
             if (liveCard) {
                 // 使用 setTimeout 确保 DOM 完全渲染和浏览器布局计算完成
                 setTimeout(() => {
                     liveCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
-            }
-
-            // 2. 时间轴视图定位
-            const timeLine = document.querySelector('.current-time-line');
-            if (timeLine && state.viewMode === 'timeline') {
-                 setTimeout(() => {
-                    const container = elements.timelineView;
-                    // 计算滚动位置：当前时间线的位置 - 容器宽度的一半
-                    const scrollLeftPosition = timeLine.offsetLeft - container.clientWidth / 2;
-                    
-                    container.scrollTo({
-                        left: Math.max(0, scrollLeftPosition), // 防止负数
-                        behavior: 'smooth'
-                    });
                 }, 100);
             }
         }
@@ -1129,21 +917,6 @@
             elements.searchInput.addEventListener('input', (e) => {
                 state.searchQuery = e.target.value;
                 renderProgramList();
-            });
-
-            // 视图切换
-            elements.viewBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    elements.viewBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    state.viewMode = btn.dataset.view;
-                    
-                    if (state.viewMode === 'timeline') {
-                        elements.timelineView.style.display = 'block';
-                    } else {
-                        elements.timelineView.style.display = 'none';
-                    }
-                });
             });
 
             // 关闭模态框
