@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>央视节目单</title>
     <style>
         * {
@@ -50,6 +50,7 @@
             font-weight: 600;
             margin-bottom: 20px;
             letter-spacing: 1px;
+            text-align: center;
         }
 
         .channel-selector {
@@ -62,11 +63,14 @@
         .channel-selector label {
             font-size: 14px;
             opacity: 0.9;
+            width: 100%;
+            text-align: center;
+            margin-bottom: -5px;
         }
 
         .channel-selector select {
             flex: 1;
-            min-width: 200px;
+            min-width: 150px;
             padding: 12px 20px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 10px;
@@ -75,10 +79,14 @@
             font-size: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
         }
 
         .channel-selector select:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background-color: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.5);
         }
 
@@ -100,6 +108,7 @@
             text-decoration: none;
             display: inline-block;
             box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+            text-align: center;
         }
 
         .live-btn:hover {
@@ -118,11 +127,13 @@
             font-weight: 600;
             color: #2a5298;
             margin-bottom: 8px;
+            text-align: center;
         }
 
         .now-playing {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             font-size: 14px;
             color: #666;
@@ -265,6 +276,7 @@
             font-size: 16px;
             color: #333;
             line-height: 1.4;
+            word-break: break-all;
         }
 
         .program-item.current .program-title {
@@ -300,50 +312,104 @@
             color: #f5576c;
         }
 
-        @media (max-width: 600px) {
+        /* 手机端适配 */
+        @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 0;
+                background: #f5f7fa;
+            }
+
+            .container {
+                border-radius: 0;
+                box-shadow: none;
+                min-height: 100vh;
             }
 
             .header {
-                padding: 20px;
+                padding: 20px 15px;
             }
 
             .header h1 {
-                font-size: 24px;
+                font-size: 22px;
+                margin-bottom: 15px;
             }
 
             .channel-selector {
                 flex-direction: column;
-                align-items: stretch;
+                gap: 10px;
             }
 
-            .live-btn {
-                text-align: center;
+            .channel-selector label {
+                text-align: left;
+                margin-bottom: 0;
+                width: auto;
+            }
+
+            .channel-selector select, .live-btn {
+                width: 100%;
+            }
+
+            .channel-info {
+                padding: 15px;
+            }
+
+            .channel-name {
+                font-size: 18px;
             }
 
             .date-navigation {
-                flex-direction: column;
+                flex-wrap: wrap;
                 padding: 15px;
+                justify-content: center;
+            }
+
+            .date-nav-btn {
+                flex: 1;
+                padding: 10px 0;
+                font-size: 13px;
             }
 
             .current-date {
-                font-size: 14px;
+                width: 100%;
+                order: -1; /* 日期显示在最上面 */
+                margin-bottom: 10px;
+                font-size: 15px;
+            }
+            
+            .today {
+                width: 100%;
+                margin-top: 10px;
+                flex: none;
             }
 
             .program-list {
-                padding: 15px;
+                padding: 10px 15px;
+                max-height: none;
+                overflow-y: visible; /* 允许页面整体滚动 */
             }
 
             .program-item {
-                flex-direction: column;
-                align-items: flex-start;
+                padding: 15px;
+                margin-bottom: 10px;
+                /* 保持单行布局，但调整比例 */
+                flex-wrap: nowrap; 
             }
 
             .time-section {
-                width: 100%;
-                margin-right: 0;
-                margin-bottom: 10px;
+                width: 70px;
+                margin-right: 15px;
+            }
+
+            .program-time {
+                font-size: 16px;
+            }
+
+            .program-duration {
+                font-size: 11px;
+            }
+
+            .program-title {
+                font-size: 15px;
             }
         }
     </style>
@@ -515,7 +581,7 @@
             const apiUrl = `https://api.cntv.cn/epg/epginfo?serviceId=tvcctv&c=${channel}&d=${dateStr}&t=json`;
 
             try {
-                // 使用 JSONP 方式请求数据（因为可能有跨域限制）
+                // 使用 JSONP 方式请求数据
                 const data = await fetchEPGData(apiUrl, channel);
                 
                 if (data && data[channel]) {
@@ -540,28 +606,22 @@
         // 通过JSONP获取数据
         function fetchEPGData(url, channel) {
             return new Promise((resolve, reject) => {
-                // 创建一个唯一的回调函数名
                 const callbackName = `epgCallback_${Date.now()}`;
-                
-                // 创建script标签
                 const script = document.createElement('script');
                 script.src = `${url}&callback=${callbackName}`;
                 
-                // 定义回调函数
                 window[callbackName] = function(data) {
                     resolve(data);
                     delete window[callbackName];
                     document.body.removeChild(script);
                 };
                 
-                // 错误处理
                 script.onerror = function() {
                     reject(new Error('网络请求失败'));
                     delete window[callbackName];
                     document.body.removeChild(script);
                 };
                 
-                // 设置超时
                 setTimeout(() => {
                     if (window[callbackName]) {
                         reject(new Error('请求超时'));
@@ -582,10 +642,8 @@
             const nowPlaying = document.getElementById('nowPlaying');
             const liveBtn = document.getElementById('liveBtn');
 
-            // 更新频道信息
             channelName.textContent = data.channelName;
             
-            // 设置直播链接
             if (data.lvUrl) {
                 liveBtn.href = data.lvUrl;
                 liveBtn.style.display = 'inline-block';
@@ -593,7 +651,6 @@
                 liveBtn.style.display = 'none';
             }
 
-            // 只有今天才显示正在播放
             const isDateToday = isToday(date);
             if (isDateToday) {
                 nowPlaying.textContent = data.isLive || '暂无信息';
@@ -602,15 +659,12 @@
                 document.querySelector('.now-playing').style.display = 'none';
             }
 
-            // 显示频道信息
             channelInfo.style.display = 'block';
 
-            // 渲染节目列表
             if (data.program && data.program.length > 0) {
                 let html = '';
                 let currentProgramIndex = -1;
 
-                // 只有今天才找到当前正在播放的节目索引
                 if (isDateToday) {
                     data.program.forEach((program, index) => {
                         if (isCurrentlyPlaying(program, data.liveSt)) {
@@ -623,7 +677,6 @@
                     const isCurrent = index === currentProgramIndex;
                     let isPast = false;
                     
-                    // 只有今天才判断是否已播放
                     if (isDateToday) {
                         isPast = isPastProgram(program);
                     }
@@ -647,19 +700,30 @@
 
                 programList.innerHTML = html;
 
-                // 滚动到当前播放的节目（仅今天）
+                // 滚动逻辑：PC端滚动列表，移动端滚动页面
                 if (isDateToday && currentProgramIndex >= 0) {
                     setTimeout(() => {
                         const currentElement = document.getElementById(`program-${currentProgramIndex}`);
                         if (currentElement) {
-                            currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // 判断是否为移动端（通过container是否为全屏判断，或直接检测宽度）
+                            const isMobile = window.innerWidth <= 768;
+                            
+                            if (isMobile) {
+                                // 移动端：滚动整个窗口
+                                currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            } else {
+                                // PC端：滚动列表容器
+                                currentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
                         }
                     }, 100);
-                } else {
-                    // 非今天，滚动到顶部
-                    setTimeout(() => {
-                        programList.scrollTop = 0;
-                    }, 100);
+                } else if (!isDateToday) {
+                    // 非今天，PC端滚动到顶部
+                    if (window.innerWidth > 768) {
+                         programList.scrollTop = 0;
+                    } else {
+                         window.scrollTo(0, 0);
+                    }
                 }
             } else {
                 programList.innerHTML = `
@@ -678,26 +742,20 @@
             const nextDayBtn = document.getElementById('nextDay');
             const todayBtn = document.getElementById('todayBtn');
             
-            // 初始化日期显示
             updateDateDisplay();
-
-            // 加载默认频道
             loadEPG(currentChannel, selectedDate);
 
-            // 频道切换事件
             channelSelect.addEventListener('change', function() {
                 currentChannel = this.value;
                 loadEPG(currentChannel, selectedDate);
             });
 
-            // 前一天
             prevDayBtn.addEventListener('click', function() {
                 selectedDate.setDate(selectedDate.getDate() - 1);
                 updateDateDisplay();
                 loadEPG(currentChannel, selectedDate);
             });
 
-            // 后一天
             nextDayBtn.addEventListener('click', function() {
                 if (!isFutureDate(selectedDate)) {
                     selectedDate.setDate(selectedDate.getDate() + 1);
@@ -706,7 +764,6 @@
                 }
             });
 
-            // 今天
             todayBtn.addEventListener('click', function() {
                 selectedDate = new Date();
                 updateDateDisplay();
