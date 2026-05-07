@@ -284,13 +284,17 @@ async function init() {
     const citySelect = document.getElementById('citySelect');
     citySelect.onchange = function () {
       selectedRegion = this.value;
+      localStorage.setItem('oilRegion', this.value);
       renderPrices(this.value);
     };
 
     populateSelect();
 
-    selectedRegion = '湖北省';
-    citySelect.value = '湖北省';
+    selectedRegion = localStorage.getItem('oilRegion');
+    if (!selectedRegion || !oilData.some(d => d.regionName === selectedRegion)) {
+      selectedRegion = '湖北省';
+    }
+    citySelect.value = selectedRegion;
 
     if (selectedRegion) {
       renderPrices(selectedRegion);
