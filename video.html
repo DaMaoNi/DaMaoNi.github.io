@@ -50,6 +50,8 @@ body {
   max-width: 680px;
   margin: 0 auto 30px;
   padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .search-box {
   display: flex;
@@ -208,8 +210,10 @@ body {
 @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
 @media (max-width: 640px) {
   .hero { padding: 40px 16px 30px; }
+  .search-wrap { padding: 0 12px; }
+  .search-box { width: 100%; }
   .search-box input { padding: 14px 18px; font-size: 15px; }
-  .search-box button { padding: 14px 22px; font-size: 14px; }
+  .search-box button { padding: 14px 18px; font-size: 14px; }
   .result-card { padding: 14px 16px; }
   .result-title { font-size: 15px; }
 }
