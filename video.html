@@ -399,16 +399,32 @@ async function fetchApi(apiPath, name) {
   }
 }
 
-function parseResult(item, type) {
+function parseResult(item, type, sourceLabel) {
   const answer = item.answer || '';
-  let title = item.question || '';
-  if (!title && type === 'juzi' && answer) {
-    const match = answer.match(/\]([^\.]+)\./);
-    if (match) title = match[1].trim();
+  let title = '';
+  
+  if (sourceLabel === 'main' && item.question) {
+    const q = item.question.trim();
+    const firstBracketEnd = q.indexOf(']');
+    if (firstBracketEnd !== -1 && q.startsWith('[')) {
+      title = q.slice(1, firstBracketEnd).trim();
+    } else {
+      title = q;
+    }
+  } else if (sourceLabel === 'xiaoyu' && item.question) {
+    title = item.question.trim().replace(/^\.+/, '');
+  } else if (sourceLabel === 'juzi' && answer) {
+    const lastBracketIdx = answer.lastIndexOf(']');
+    if (lastBracketIdx !== -1) {
+      const afterBracket = answer.slice(lastBracketIdx + 1);
+      const dotIdx = afterBracket.indexOf('.');
+      title = dotIdx !== -1 ? afterBracket.slice(0, dotIdx).trim() : afterBracket.trim();
+    }
   }
+  
   const poster = item.bd_pic || '';
   const links = extractLinks(answer);
-  return { title, poster, links, source: type };
+  return { title, poster, links, source: sourceLabel };
 }
 
 function dedupTitle(items) {
