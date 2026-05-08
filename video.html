@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>影视资源搜索</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #0a0a0f;
+  min-height: 100vh;
+  color: #e0e0e0;
+}
+.bg-stars {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(2px 2px at 40% 70%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 60% 20%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(2px 2px at 10% 80%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 90% 85%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(2px 2px at 30% 60%, rgba(255,255,255,0.4), transparent),
+    radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 15% 15%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(2px 2px at 55% 90%, rgba(255,255,255,0.4), transparent),
+    linear-gradient(180deg, #0a0a1a 0%, #0d1120 50%, #0a0a15 100%);
+  z-index: -1;
+}
+.hero {
+  text-align: center;
+  padding: 60px 20px 40px;
+  position: relative;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e50914, #f5a623, #e50914, transparent);
+}
+.hero h1 {
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 800;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #e50914 0%, #f5a623 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  text-shadow: none;
+}
+.hero p {
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+.search-wrap {
+  max-width: 680px;
+  margin: 0 auto 30px;
+  padding: 0 20px;
+}
+.search-box {
+  display: flex;
+  gap: 0;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.search-box:focus-within {
+  border-color: #e50914;
+  box-shadow: 0 0 30px rgba(229,9,20,0.2);
+}
+.search-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 16px 24px;
+  font-size: 16px;
+  color: #fff;
+}
+.search-box input::placeholder { color: rgba(255,255,255,0.3); }
+.search-box button {
+  background: linear-gradient(135deg, #e50914, #c50e1a);
+  border: none;
+  color: #fff;
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+.search-box button:hover { background: linear-gradient(135deg, #f01e2b, #dc1522); }
+.search-box button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+.result-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+.result-card:hover {
+  border-color: rgba(229,9,20,0.3);
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+.result-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.result-poster {
+  width: 80px;
+  height: 110px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: rgba(255,255,255,0.05);
+  flex-shrink: 0;
+}
+.result-poster.no-pic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: rgba(255,255,255,0.2);
+}
+.result-info { flex: 1; min-width: 0; }
+.result-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.5;
+  word-break: break-all;
+}
+.result-source {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.source-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+}
+.source-tag.main { background: rgba(229,9,20,0.2); color: #e50914; }
+.source-tag.xiaoyu { background: rgba(245,166,35,0.2); color: #f5a623; }
+.source-tag.juzi { background: rgba(76,175,80,0.2); color: #4caf50; }
+.links-section { position: relative; }
+.links-section summary {
+  cursor: pointer;
+  color: #f5a623;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 0;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.links-section summary:hover { color: #ffc107; }
+.links-section summary::after {
+  content: '▸';
+  display: inline-block;
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.links-section[open] summary::after { transform: rotate(90deg); }
+.link-list { margin-top: 10px; }
+.link-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.2s ease;
+}
+.link-item:hover {
+  border-color: rgba(245,166,35,0.3);
+  background: rgba(0,0,0,0.5);
+}
+.platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+.platform-badge.baidu { background: rgba(41,128,255,0.2); color: #2980ff; }
+.link-url {
+  flex: 1;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  word-break: break-all;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.link-code {
+  font-size: 12px;
+  color: #f5a623;
+  font-weight: 600;
+  background: rgba(245,166,35,0.1);
+  padding: 3px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.copy-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.copy-btn:hover {
+  background: rgba(245,166,35,0.15);
+  border-color: #f5a623;
+  color: #f5a623;
+}
+.copy-btn.copied {
+  background: rgba(76,175,80,0.2);
+  border-color: #4caf50;
+  color: #4caf50;
+}
+.loading-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+.reel-spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 20px;
+  border: 3px solid rgba(229,9,20,0.15);
+  border-top-color: #e50914;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: rgba(255,255,255,0.35);
+}
+.empty-state .icon { font-size: 64px; margin-bottom: 16px; }
+.empty-state p { font-size: 16px; }
+.error-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #e50914;
+}
+.toast {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-size: 14px;
+  z-index: 1000;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 1.7s forwards;
+  pointer-events: none;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+@media (max-width: 640px) {
+  .hero { padding: 40px 16px 30px; }
+  .search-box input { padding: 14px 18px; font-size: 15px; }
+  .search-box button { padding: 14px 22px; font-size: 14px; }
+  .result-card { padding: 14px 16px; }
+  .result-poster { width: 60px; height: 84px; }
+  .result-title { font-size: 15px; }
+  .link-item { flex-wrap: wrap; }
+  .link-url { white-space: normal; }
+}
+</style>
+</head>
+<body>
+<div class="bg-stars"></div>
+
+<div class="hero">
+  <h1>影 视 搜 索</h1>
+  <p>FILM &amp; TV RESOURCE FINDER</p>
+</div>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="输入影视作品名称..." autocomplete="off">
+    <button id="searchBtn" onclick="doSearch()">搜 索</button>
+  </div>
+</div>
+
+<div class="main" id="results"></div>
+
+<script>
+const TOKEN = 'i69';
+
+let toastTimer = null;
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.remove(), 2200);
+}
+
+function extractLinks(text) {
+  const links = [];
+  const pattern = /https?:\/\/pan\.baidu\.com\/s\/[a-zA-Z0-9_\-?=&]+/g;
+
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    let fullUrl = match[0].replace(/#$/, '');
+    const urlIdx = match.index;
+    const contextStart = Math.max(0, urlIdx - 30);
+    const contextEnd = Math.min(text.length, urlIdx + fullUrl.length + 60);
+    let context = text.slice(contextStart, contextEnd);
+    context = context.replace(fullUrl, '');
+
+    let pwd = '';
+    const pwdMatch = context.match(/提取码[：:\s]*([a-zA-Z0-9]{3,8})/);
+    if (pwdMatch) pwd = pwdMatch[1];
+    if (!pwd) {
+      const pwdMatch2 = text.match(/提取码[：:\s]*([a-zA-Z0-9]{3,8})/);
+      if (pwdMatch2) pwd = pwdMatch2[1];
+    }
+
+    if (!links.some(l => l.url === fullUrl)) {
+      links.push({ url: fullUrl, platform: 'baidu', label: '百度网盘', code: pwd });
+    }
+  }
+
+  return links;
+}
+
+async function fetchApi(apiPath, name) {
+  const params = new URLSearchParams({ name, token: TOKEN });
+  try {
+    const res = await fetch(`http://m.kkqws.com/v/api/${apiPath}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+      body: params.toString(),
+      signal: AbortSignal.timeout(12000)
+    });
+    const data = await res.json();
+    if (data.us && data.list) return { type: apiPath, list: data.list };
+    return null;
+  } catch (e) {
+    console.warn(`${apiPath} 请求失败:`, e.message);
+    return null;
+  }
+}
+
+function parseResult(item, type) {
+  const title = item.question || '';
+  const answer = item.answer || '';
+  const poster = item.bd_pic || '';
+  const links = extractLinks(answer);
+  return { title, poster, links, source: type };
+}
+
+function dedupTitle(items) {
+  const seen = new Set();
+  return items.filter(item => {
+    const key = item.title.trim().replace(/\s+/g, '');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function sanitizeLinks(links) {
+  const seen = new Set();
+  return links.filter(l => {
+    if (seen.has(l.url)) return false;
+    seen.add(l.url);
+    return true;
+  });
+}
+
+async function doSearch() {
+  const input = document.getElementById('searchInput');
+  const name = input.value.trim();
+  if (!name) {
+    showToast('请输入影视名称');
+    return;
+  }
+
+  const resultsEl = document.getElementById('results');
+  const btn = document.getElementById('searchBtn');
+
+  resultsEl.innerHTML = '<div class="loading-state"><div class="reel-spinner"></div><div>正在搜索资源...</div></div>';
+  btn.disabled = true;
+
+  const apis = ['search', 'getXiaoyu', 'getJuzi'];
+  const sourceLabels = { search: 'main', getXiaoyu: 'xiaoyu', getJuzi: 'juzi' };
+
+  const allResults = [];
+  const promises = apis.map(api => fetchApi(api, name));
+  const responses = await Promise.all(promises);
+
+  for (let i = 0; i < responses.length; i++) {
+    const resp = responses[i];
+    if (!resp || !resp.list) continue;
+    for (const item of resp.list) {
+      const parsed = parseResult(item, sourceLabels[apis[i]]);
+      if (parsed.links.length > 0) {
+        parsed.title = parsed.title || item.question || '';
+        parsed.links = sanitizeLinks(parsed.links);
+        allResults.push(parsed);
+      }
+    }
+  }
+
+  if (allResults.length === 0) {
+    resultsEl.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🎬</div>
+        <p>未找到"${escapeHtml(name)}"的相关资源</p>
+        <p style="font-size:13px;margin-top:6px;">请尝试其他关键词或检查拼写</p>
+      </div>`;
+    btn.disabled = false;
+    return;
+  }
+
+  const deduped = dedupTitle(allResults);
+  renderResults(deduped);
+  btn.disabled = false;
+}
+
+function renderResults(results) {
+  const resultsEl = document.getElementById('results');
+  let html = '';
+
+  const sourceLabels = { main: '主搜索', xiaoyu: '小宇', juzi: '句子' };
+
+  for (const item of results) {
+    html += `<div class="result-card">`;
+    html += `<div class="result-header">`;
+
+    if (item.poster) {
+      html += `<img class="result-poster" src="${escapeAttr(item.poster)}" alt="" onerror="this.className='result-poster no-pic';this.innerHTML='🎬';">`;
+    } else {
+      html += `<div class="result-poster no-pic">🎬</div>`;
+    }
+
+    html += `<div class="result-info">`;
+    html += `<div class="result-title">${escapeHtml(item.title)}</div>`;
+    html += `<div class="result-source">
+      <span class="source-tag ${escapeAttr(item.source || 'main')}">${escapeHtml(sourceLabels[item.source] || item.source || '')}</span>
+      共 ${item.links.length} 个链接
+    </div>`;
+    html += `</div></div>`;
+
+    if (item.links.length > 0) {
+      const detailId = `links-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      html += `<details class="links-section" id="${detailId}"><summary>查看链接 (${item.links.length}个)</summary><div class="link-list">`;
+
+      for (const link of item.links) {
+        html += `<div class="link-item">`;
+        html += `<span class="platform-badge ${escapeAttr(link.platform)}">${escapeHtml(link.label)}</span>`;
+        html += `<span class="link-url" title="${escapeAttr(link.url)}">${escapeHtml(link.url)}</span>`;
+        if (link.code) {
+          html += `<span class="link-code">提取码: ${escapeHtml(link.code)}</span>`;
+        }
+        const linkId = `${detailId}-${Math.random().toString(36).slice(2, 6)}`;
+        html += `<button class="copy-btn" id="${linkId}" data-url="${escapeAttr(link.url)}" data-code="${escapeAttr(link.code)}" onclick="copyLink('${linkId}')">复制</button>`;
+        html += `</div>`;
+      }
+
+      html += `</div></details>`;
+    }
+
+    html += `</div>`;
+  }
+
+  resultsEl.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function escapeAttr(str) {
+  if (!str) return '';
+  return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;');
+}
+
+function copyLink(btnId) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  const url = btn.dataset.url;
+  const code = btn.dataset.code;
+  const text = code ? `${url}\n提取码: ${code}` : url;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
+    }).catch(() => fallbackCopy(text, btn));
+  } else {
+    fallbackCopy(text, btn);
+  }
+}
+
+function fallbackCopy(text, btn) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  ta.style.top = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    btn.textContent = '已复制';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
+  } catch (e) {
+    showToast('复制失败，请手动复制');
+  }
+  document.body.removeChild(ta);
+}
+
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>
