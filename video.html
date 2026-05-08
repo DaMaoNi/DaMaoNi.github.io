@@ -122,45 +122,18 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(0,0,0,0.12);
 }
-.result-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 14px;
-  line-height: 1;
-}
-.result-poster {
-  width: 80px;
-  height: 110px;
-  border-radius: 8px;
-  object-fit: cover;
-  background: #f5f7fa;
-  flex-shrink: 0;
-  border: 1px solid rgba(0,0,0,0.08);
-}
-.result-poster.no-pic {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  color: rgba(0,0,0,0.3);
-  background: #f5f7fa;
-}
-.result-info {
-  flex: 1;
-  min-width: 0;
-}
 .result-title {
   font-size: 17px;
   font-weight: 600;
   color: #222;
   line-height: 1.5;
   word-break: break-all;
+  margin-bottom: 12px;
 }
 .result-source {
   font-size: 12px;
   color: rgba(0,0,0,0.45);
-  margin-top: 6px;
+  margin-bottom: 12px;
 }
 .source-tag {
   display: inline-block;
@@ -173,92 +146,18 @@ body {
 .source-tag.main { background: rgba(255,107,107,0.15); color: #e55039; }
 .source-tag.xiaoyu { background: rgba(254,202,87,0.2); color: #e1b12c; }
 .source-tag.juzi { background: rgba(46,213,115,0.15); color: #2ed573; }
-.links-section { position: relative; }
-.links-section summary {
-  cursor: pointer;
-  color: #feca57;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 8px 0;
-  user-select: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.links-section summary:hover { color: #ffc107; }
-.links-section summary::after {
-  content: '▸';
-  display: inline-block;
-  font-size: 10px;
-  transition: transform 0.2s;
-}
-.links-section[open] summary::after { transform: rotate(90deg); }
-.link-list { margin-top: 10px; }
-.link-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
+.answer-section {
   background: #f8f9fa;
   border-radius: 10px;
-  margin-bottom: 8px;
+  padding: 12px 16px;
   border: 1px solid rgba(0,0,0,0.06);
-  transition: all 0.2s ease;
 }
-.link-item:hover {
-  border-color: rgba(254,202,87,0.4);
-  background: #f0f2f5;
-}
-.platform-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  flex-shrink: 0;
-  letter-spacing: 0.5px;
-}
-.platform-badge.baidu { background: rgba(41,128,255,0.15); color: #2980ff; }
-.link-url {
-  flex: 1;
-  font-size: 13px;
-  color: #444;
+.answer-text {
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
   word-break: break-all;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.link-code {
-  font-size: 12px;
-  color: #e1b12c;
-  font-weight: 600;
-  background: rgba(254,202,87,0.12);
-  padding: 3px 8px;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-.copy-btn {
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.12);
-  color: #555;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-.copy-btn:hover {
-  background: rgba(254,202,87,0.15);
-  border-color: #feca57;
-  color: #e1b12c;
-}
-.copy-btn.copied {
-  background: rgba(46,213,115,0.15);
-  border-color: #2ed573;
-  color: #2ed573;
+  white-space: pre-wrap;
 }
 .loading-state {
   text-align: center;
@@ -281,11 +180,6 @@ body {
 }
 .empty-state .icon { font-size: 64px; margin-bottom: 16px; }
 .empty-state p { font-size: 16px; }
-.error-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: #e55039;
-}
 .toast {
   position: fixed;
   top: 30px;
@@ -308,10 +202,7 @@ body {
   .search-box input { padding: 14px 18px; font-size: 15px; }
   .search-box button { padding: 14px 22px; font-size: 14px; }
   .result-card { padding: 14px 16px; }
-  .result-poster { width: 60px; height: 84px; }
   .result-title { font-size: 15px; }
-  .link-item { flex-wrap: wrap; }
-  .link-url { white-space: normal; }
 }
 </style>
 </head>
@@ -347,35 +238,6 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.remove(), 2200);
 }
 
-function extractLinks(text) {
-  const links = [];
-  const pattern = /https?:\/\/pan\.baidu\.com\/s\/[a-zA-Z0-9_\-?=&]+/g;
-
-  let match;
-  while ((match = pattern.exec(text)) !== null) {
-    let fullUrl = match[0].replace(/#$/, '');
-    const urlIdx = match.index;
-    const contextStart = Math.max(0, urlIdx - 30);
-    const contextEnd = Math.min(text.length, urlIdx + fullUrl.length + 60);
-    let context = text.slice(contextStart, contextEnd);
-    context = context.replace(fullUrl, '');
-
-    let pwd = '';
-    const pwdMatch = context.match(/提取码[：:\s]*([a-zA-Z0-9]{3,8})/);
-    if (pwdMatch) pwd = pwdMatch[1];
-    if (!pwd) {
-      const pwdMatch2 = text.match(/提取码[：:\s]*([a-zA-Z0-9]{3,8})/);
-      if (pwdMatch2) pwd = pwdMatch2[1];
-    }
-
-    if (!links.some(l => l.url === fullUrl)) {
-      links.push({ url: fullUrl, platform: 'baidu', label: '百度网盘', code: pwd });
-    }
-  }
-
-  return links;
-}
-
 const PROXY_BASE = 'https://corsproxy.io/?';
 
 async function fetchApi(apiPath, name) {
@@ -399,36 +261,21 @@ async function fetchApi(apiPath, name) {
   }
 }
 
-function parseResult(item, type, sourceLabel) {
-  const answer = item.answer || '';
-  let title = '';
-  
-  if (sourceLabel === 'juzi' && answer) {
-    title = answer.split('\n')[0].trim();
-  } else if (item.question) {
-    title = item.question.trim();
+function parseResult(item, sourceLabel) {
+  let title = item.question ? item.question.trim() : '';
+  if (!title && sourceLabel === 'juzi' && item.answer) {
+    title = item.answer.split('\n')[0].trim();
   }
-  
-  const poster = item.bd_pic || '';
-  const links = extractLinks(answer);
-  return { title, poster, links, source: sourceLabel };
+  const answer = item.answer || '';
+  return { title, answer, source: sourceLabel };
 }
 
 function dedupTitle(items) {
   const seen = new Set();
   return items.filter(item => {
-    const key = item.title.trim().replace(/\s+/g, '');
+    const key = item.title.replace(/\s+/g, '');
     if (seen.has(key)) return false;
     seen.add(key);
-    return true;
-  });
-}
-
-function sanitizeLinks(links) {
-  const seen = new Set();
-  return links.filter(l => {
-    if (seen.has(l.url)) return false;
-    seen.add(l.url);
     return true;
   });
 }
@@ -459,9 +306,7 @@ async function doSearch() {
     if (!resp || !resp.list) continue;
     for (const item of resp.list) {
       const parsed = parseResult(item, sourceLabels[apis[i]]);
-      if (parsed.links.length > 0) {
-        parsed.title = parsed.title || item.question || '';
-        parsed.links = sanitizeLinks(parsed.links);
+      if (parsed.answer) {
         allResults.push(parsed);
       }
     }
@@ -491,39 +336,13 @@ function renderResults(results) {
 
   for (const item of results) {
     html += `<div class="result-card">`;
-    html += `<div class="result-header">`;
-
-    if (item.poster) {
-      html += `<img class="result-poster" src="${escapeAttr(item.poster)}" alt="" onerror="this.className='result-poster no-pic';this.innerHTML='🎥';">`;
-    } else {
-      html += `<div class="result-poster no-pic">🎥</div>`;
-    }
-
-    html += `<div class="result-info">`;
     html += `<div class="result-title">${escapeHtml(item.title)}</div>`;
     html += `<div class="result-source">
       <span class="source-tag ${escapeAttr(item.source || 'main')}">${escapeHtml(sourceLabels[item.source] || item.source || '')}</span>
     </div>`;
-    html += `</div></div>`;
-
-    if (item.links.length > 0) {
-      html += `<div class="link-list">`;
-
-      for (const link of item.links) {
-        html += `<div class="link-item">`;
-        html += `<span class="platform-badge ${escapeAttr(link.platform)}">${escapeHtml(link.label)}</span>`;
-        html += `<span class="link-url" title="${escapeAttr(link.url)}">${escapeHtml(link.url)}</span>`;
-        if (link.code) {
-          html += `<span class="link-code">提取码: ${escapeHtml(link.code)}</span>`;
-        }
-        const linkId = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-        html += `<button class="copy-btn" id="${linkId}" data-url="${escapeAttr(link.url)}" data-code="${escapeAttr(link.code)}" onclick="copyLink('${linkId}')">复制</button>`;
-        html += `</div>`;
-      }
-
-      html += `</div>`;
-    }
-
+    html += `<div class="answer-section">`;
+    html += `<div class="answer-text">${escapeHtml(item.answer)}</div>`;
+    html += `</div>`;
     html += `</div>`;
   }
 
@@ -538,43 +357,6 @@ function escapeHtml(str) {
 function escapeAttr(str) {
   if (!str) return '';
   return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;');
-}
-
-function copyLink(btnId) {
-  const btn = document.getElementById(btnId);
-  if (!btn) return;
-  const url = btn.dataset.url;
-  const code = btn.dataset.code;
-  const text = code ? `${url}\n提取码: ${code}` : url;
-
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = '已复制';
-      btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
-    }).catch(() => fallbackCopy(text, btn));
-  } else {
-    fallbackCopy(text, btn);
-  }
-}
-
-function fallbackCopy(text, btn) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.position = 'fixed';
-  ta.style.left = '-9999px';
-  ta.style.top = '0';
-  document.body.appendChild(ta);
-  ta.select();
-  try {
-    document.execCommand('copy');
-    btn.textContent = '已复制';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
-  } catch (e) {
-    showToast('复制失败，请手动复制');
-  }
-  document.body.removeChild(ta);
 }
 
 document.getElementById('searchInput').addEventListener('keydown', function(e) {
