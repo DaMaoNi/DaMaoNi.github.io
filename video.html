@@ -494,13 +494,11 @@ function renderResults(results) {
     html += `<div class="result-title">${escapeHtml(item.title)}</div>`;
     html += `<div class="result-source">
       <span class="source-tag ${escapeAttr(item.source || 'main')}">${escapeHtml(sourceLabels[item.source] || item.source || '')}</span>
-      共 ${item.links.length} 个链接
     </div>`;
     html += `</div></div>`;
 
     if (item.links.length > 0) {
-      const detailId = `links-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      html += `<details class="links-section" id="${detailId}"><summary>查看链接 (${item.links.length}个)</summary><div class="link-list">`;
+      html += `<div class="link-list">`;
 
       for (const link of item.links) {
         html += `<div class="link-item">`;
@@ -509,12 +507,12 @@ function renderResults(results) {
         if (link.code) {
           html += `<span class="link-code">提取码: ${escapeHtml(link.code)}</span>`;
         }
-        const linkId = `${detailId}-${Math.random().toString(36).slice(2, 6)}`;
+        const linkId = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
         html += `<button class="copy-btn" id="${linkId}" data-url="${escapeAttr(link.url)}" data-code="${escapeAttr(link.code)}" onclick="copyLink('${linkId}')">复制</button>`;
         html += `</div>`;
       }
 
-      html += `</div></details>`;
+      html += `</div>`;
     }
 
     html += `</div>`;
