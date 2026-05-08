@@ -489,9 +489,9 @@ function renderResults(results) {
     html += `<div class="result-header">`;
 
     if (item.poster) {
-      html += `<img class="result-poster" src="${escapeAttr(item.poster)}" alt="" onerror="this.className='result-poster no-pic';this.innerHTML='🎬';">`;
+      html += `<img class="result-poster" src="${escapeAttr(item.poster)}" alt="" onerror="this.className='result-poster no-pic';this.innerHTML='🎥';">`;
     } else {
-      html += `<div class="result-poster no-pic">🎬</div>`;
+      html += `<div class="result-poster no-pic">🎥</div>`;
     }
 
     html += `<div class="result-info">`;
