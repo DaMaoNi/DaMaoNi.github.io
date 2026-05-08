@@ -374,7 +374,7 @@ function extractLinks(text) {
   return links;
 }
 
-const PROXY_BASE = 'https://api.allorigins.win/raw?url=';
+const PROXY_BASE = 'https://corsproxy.io/?';
 
 async function fetchApi(apiPath, name) {
   const params = new URLSearchParams({ name, token: TOKEN });
