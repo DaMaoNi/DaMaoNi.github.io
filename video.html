@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>影视资源搜索</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; overflow-x: hidden; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
   background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 50%, #dce2f0 100%);
@@ -60,8 +60,10 @@ body {
   border: 1px solid rgba(0,0,0,0.1);
   border-radius: 50px;
   overflow: hidden;
+  overflow-x: hidden;
   transition: all 0.3s ease;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  max-width: 100%;
 }
 .search-box:focus-within {
   border-color: #feca57;
