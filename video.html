@@ -47,7 +47,7 @@ body {
   letter-spacing: 2px;
 }
 .disclaimer {
-  max-width: 500px;
+  max-width: 480px;
   margin: 0 auto 20px;
   padding: 12px 16px;
   background: rgba(0,0,0,0.04);
@@ -58,7 +58,7 @@ body {
   line-height: 1.5;
 }
 .search-wrap {
-  max-width: 500px;
+  max-width: 480px;
   margin: 0 auto 30px;
   padding: 0 20px;
   width: 100%;
@@ -222,13 +222,20 @@ body {
 @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
 @media (max-width: 640px) {
-  .hero { padding: 40px 16px 30px; }
-  .search-wrap { padding: 0 12px; }
+  .hero { padding: 30px 16px 20px; }
+  .hero h1 { font-size: 24px; letter-spacing: 2px; }
+  .hero p { font-size: 12px; }
+  .search-wrap { padding: 0 16px; max-width: 100%; }
   .search-box { width: 100%; }
-  .search-box input { padding: 14px 18px; font-size: 15px; }
-  .search-box button { padding: 14px 18px; font-size: 14px; }
-  .result-card { padding: 14px 16px; }
-  .result-title { font-size: 15px; }
+  .search-box input { padding: 12px 16px; font-size: 14px; }
+  .search-box button { padding: 12px 16px; font-size: 13px; }
+  .disclaimer { padding: 10px 12px; font-size: 11px; margin-bottom: 16px; }
+  .result-card { padding: 12px 14px; }
+  .result-title { font-size: 14px; }
+  .result-source { font-size: 11px; }
+  .answer-text { font-size: 13px; }
+  .source-tag { font-size: 10px; padding: 3px 8px; }
+  .copy-btn { padding: 5px 10px; font-size: 11px; }
 }
 </style>
 </head>
