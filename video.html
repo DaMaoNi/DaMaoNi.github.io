@@ -159,6 +159,27 @@ body {
   word-break: break-all;
   white-space: pre-wrap;
 }
+.copy-btn {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.12);
+  color: #555;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.copy-btn:hover {
+  background: rgba(254,202,87,0.15);
+  border-color: #feca57;
+  color: #e1b12c;
+}
+.copy-btn.copied {
+  background: rgba(46,213,115,0.15);
+  border-color: #2ed573;
+  color: #2ed573;
+}
 .loading-state {
   text-align: center;
   padding: 80px 20px;
@@ -334,7 +355,9 @@ function renderResults(results) {
 
   const sourceLabels = { main: '主搜索', xiaoyu: '小宇', juzi: '句子' };
 
-  for (const item of results) {
+  for (let i = 0; i < results.length; i++) {
+    const item = results[i];
+    const btnId = 'copy-' + i;
     html += `<div class="result-card">`;
     html += `<div class="result-title">${escapeHtml(item.title)}</div>`;
     html += `<div class="result-source">
@@ -342,6 +365,9 @@ function renderResults(results) {
     </div>`;
     html += `<div class="answer-section">`;
     html += `<div class="answer-text">${escapeHtml(item.answer)}</div>`;
+    html += `</div>`;
+    html += `<div style="margin-top:12px;text-align:right;">`;
+    html += `<button class="copy-btn" id="${btnId}" data-answer="${escapeAttr(item.answer)}" onclick="copyAnswer('${btnId}')">复制</button>`;
     html += `</div>`;
     html += `</div>`;
   }
@@ -357,6 +383,41 @@ function escapeHtml(str) {
 function escapeAttr(str) {
   if (!str) return '';
   return str.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/&/g, '&amp;');
+}
+
+function copyAnswer(btnId) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  const text = btn.dataset.answer;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
+    }).catch(() => fallbackCopy(text, btn));
+  } else {
+    fallbackCopy(text, btn);
+  }
+}
+
+function fallbackCopy(text, btn) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  ta.style.top = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    btn.textContent = '已复制';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
+  } catch (e) {
+    showToast('复制失败，请手动复制');
+  }
+  document.body.removeChild(ta);
 }
 
 document.getElementById('searchInput').addEventListener('keydown', function(e) {
