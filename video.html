@@ -398,8 +398,12 @@ async function fetchApi(apiPath, name) {
 }
 
 function parseResult(item, type) {
-  const title = item.question || '';
   const answer = item.answer || '';
+  let title = item.question || '';
+  if (!title && type === 'juzi' && answer) {
+    const match = answer.match(/\]([^\.]+)\./);
+    if (match) title = match[1].trim();
+  }
   const poster = item.bd_pic || '';
   const links = extractLinks(answer);
   return { title, poster, links, source: type };
