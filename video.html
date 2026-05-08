@@ -283,11 +283,14 @@ async function fetchApi(apiPath, name) {
 }
 
 function parseResult(item, sourceLabel) {
-  let title = item.question ? item.question.trim() : '';
-  if (!title && sourceLabel === 'juzi' && item.answer) {
-    title = item.answer.split('\n')[0].trim();
-  }
   const answer = item.answer || '';
+  if (!answer.includes('pan.baidu.com')) {
+    return null;
+  }
+  let title = item.question ? item.question.trim() : '';
+  if (!title && sourceLabel === 'juzi') {
+    title = answer.split('\n')[0].trim();
+  }
   return { title, answer, source: sourceLabel };
 }
 
@@ -327,7 +330,7 @@ async function doSearch() {
     if (!resp || !resp.list) continue;
     for (const item of resp.list) {
       const parsed = parseResult(item, sourceLabels[apis[i]]);
-      if (parsed.answer) {
+      if (parsed) {
         allResults.push(parsed);
       }
     }
