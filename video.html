@@ -39,8 +39,14 @@ body {
   transform: translateX(-50%);
   width: 60%;
   height: 3px;
-  background: linear-gradient(90deg, transparent, #ff6b6b, #feca57, #ff6b6b, transparent);
+  background: linear-gradient(90deg, transparent 0%, #ff6b6b 25%, #feca57 50%, #ff6b6b 75%, transparent 100%);
+  background-size: 200% 100%;
   border-radius: 2px;
+  animation: lightBar 2s linear infinite;
+}
+@keyframes lightBar {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 .hero h1 {
   font-size: clamp(28px, 5vw, 48px);
