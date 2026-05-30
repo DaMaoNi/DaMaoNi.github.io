@@ -512,6 +512,16 @@
             return `${year}${month}${day}`;
         }
 
+        // 频道映射（特殊频道处理）
+        const channelApiMap = {
+            cctv9: 'cctvjilu',
+            cctv14: 'cctvchild'
+        };
+
+        function getApiChannel(channel) {
+            return channelApiMap[channel] || channel;
+        }
+
         // 判断是否是今天
         function isToday(date) {
             const today = new Date();
@@ -578,14 +588,15 @@
             `;
 
             const dateStr = getDateString(date);
-            const apiUrl = `https://api.cntv.cn/epg/epginfo?serviceId=tvcctv&c=${channel}&d=${dateStr}&t=json`;
+            const apiChannel = getApiChannel(channel);
+            const apiUrl = `https://api.cntv.cn/epg/epginfo?serviceId=tvcctv&c=${apiChannel}&d=${dateStr}&t=json`;
 
             try {
                 // 使用 JSONP 方式请求数据
                 const data = await fetchEPGData(apiUrl, channel);
                 
-                if (data && data[channel]) {
-                    currentData = data[channel];
+                if (data && data[apiChannel]) {
+                    currentData = data[apiChannel];
                     renderProgramList(currentData, date);
                 } else {
                     throw new Error('数据格式错误');
