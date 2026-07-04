@@ -172,11 +172,9 @@ body {
   font-size: 11px;
   line-height: 1;
   font-weight: 500;
+  background: rgba(46,213,115,0.15);
+  color: #2ed573;
 }
-
-.source-tag.main { background: rgba(255,107,107,0.15); color: #e55039; }
-.source-tag.xiaoyu { background: rgba(254,202,87,0.2); color: #e1b12c; }
-.source-tag.juzi { background: rgba(46,213,115,0.15); color: #2ed573; }
 
 .answer-section {
   background: #f8f9fa;
@@ -400,6 +398,7 @@ body {
 
 <script>
 const TOKEN = 'i69';
+const API_URL = 'http://doudoupan.com/v/api/getJuzi';
 
 let toastTimer = null;
 function showToast(msg) {
@@ -413,39 +412,36 @@ function showToast(msg) {
   toastTimer = setTimeout(() => { if (t.parentNode) t.remove(); }, 2200);
 }
 
-const PROXY_BASE = 'https://corsproxy.io/?';
-
-async function fetchApi(apiPath, name) {
+async function fetchApi(name) {
   const params = new URLSearchParams({ name, token: TOKEN });
-  const targetUrl = 'http://m.kkqws.com/v/api/' + apiPath;
-  const proxyUrl = PROXY_BASE + encodeURIComponent(targetUrl);
   try {
-    const res = await fetch(proxyUrl, {
+    // 直接请求接口，不走代理转发
+    const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
       body: params.toString(),
       signal: AbortSignal.timeout(15000)
     });
-    if (!res.ok) throw new Error('proxy error');
+    if (!res.ok) throw new Error('请求错误: ' + res.status);
     const data = await res.json();
-    if (data.us && data.list) return { type: apiPath, list: data.list };
+    if (data.us && data.list) return data.list;
     return null;
   } catch (e) {
-    console.warn(apiPath + ' 请求失败:', e.message);
+    console.warn('请求失败:', e.message);
     return null;
   }
 }
 
-function parseResult(item, sourceLabel) {
+function parseResult(item) {
   const answer = item.answer || '';
   if (!answer.includes('pan.baidu.com')) {
     return null;
   }
   let title = item.question ? item.question.trim() : '';
-  if (!title && sourceLabel === 'juzi') {
+  if (!title) {
     title = answer.split('\n')[0].trim();
   }
-  return { title: title, answer: answer, source: sourceLabel };
+  return { title: title, answer: answer };
 }
 
 function dedupTitle(items) {
@@ -458,7 +454,6 @@ function dedupTitle(items) {
   });
 }
 
-/* 存储搜索结果，复制时按索引取值，避免在 HTML 属性中嵌入大段文本 */
 var searchResultsData = [];
 
 async function doSearch() {
@@ -475,18 +470,12 @@ async function doSearch() {
   resultsEl.innerHTML = '<div class="loading-state"><div class="reel-spinner"></div><div>正在搜索资源...</div></div>';
   btn.disabled = true;
 
-  var apis = ['search', 'getXiaoyu', 'getJuzi'];
-  var sourceLabels = { search: 'main', getXiaoyu: 'xiaoyu', getJuzi: 'juzi' };
-
+  var list = await fetchApi(name);
   var allResults = [];
-  var promises = apis.map(function(api) { return fetchApi(api, name); });
-  var responses = await Promise.all(promises);
 
-  for (var i = 0; i < responses.length; i++) {
-    var resp = responses[i];
-    if (!resp || !resp.list) continue;
-    for (var j = 0; j < resp.list.length; j++) {
-      var parsed = parseResult(resp.list[j], sourceLabels[apis[i]]);
+  if (list && list.length) {
+    for (var j = 0; j < list.length; j++) {
+      var parsed = parseResult(list[j]);
       if (parsed) {
         allResults.push(parsed);
       }
@@ -514,14 +503,12 @@ function renderResults(results) {
   var resultsEl = document.getElementById('results');
   var html = '';
 
-  var sourceLabels = { main: '主搜索', xiaoyu: '小宇', juzi: '句子' };
-
   for (var i = 0; i < results.length; i++) {
     var item = results[i];
     html += '<div class="result-card">';
     html += '<div class="result-title">' + escapeHtml(item.title) + '</div>';
     html += '<div class="result-source">';
-    html += '<span class="source-tag ' + escapeAttr(item.source || 'main') + '">' + escapeHtml(sourceLabels[item.source] || item.source || '') + '</span>';
+    html += '<span class="source-tag">句子</span>';
     html += '</div>';
     html += '<div class="answer-section">';
     html += '<div class="answer-text">' + escapeHtml(item.answer) + '</div>';
@@ -542,15 +529,6 @@ function escapeHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function escapeAttr(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
 }
 
 function copyAnswer(index) {
