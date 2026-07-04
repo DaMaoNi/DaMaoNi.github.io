@@ -5,24 +5,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>影视资源搜索</title>
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-html {
-  overflow-x: hidden;
-  overflow-y: auto;
+:root {
+  --c-bg-start: #f5f7fa;
+  --c-bg-mid: #e4e8f0;
+  --c-bg-end: #dce2f0;
+  --c-primary-start: #ff6b6b;
+  --c-primary-mid: #feca57;
+  --c-primary-end: #ff9f43;
+  --c-btn-hover-start: #ff8787;
+  --c-btn-hover-end: #f9703a;
+  --c-success-soft-bg: rgba(46,213,115,0.15);
+  --c-success-text: #2ed573;
+  --c-text-main: #333;
+  --c-text-sub: rgba(0,0,0,0.5);
+  --c-text-soft: rgba(0,0,0,0.45);
+  --c-border: rgba(0,0,0,0.1);
+  --c-border-hover: rgba(254,202,87,0.5);
+  --c-bg-soft: rgba(0,0,0,0.04);
+  --c-bg-card: #f8f9fa;
+  --c-border-soft: rgba(0,0,0,0.06);
+  --c-copy-border: rgba(0,0,0,0.12);
+  --c-copy-bg-hover: rgba(254,202,87,0.15);
+  --c-copy-border-hover: #feca57;
+  --c-copy-text-hover: #e1b12c;
+  --c-spinner-track: rgba(255,107,107,0.2);
+  --c-spinner-bar: #ff6b6b;
+  --c-toast-bg: rgba(0,0,0,0.8);
+  --c-toast-text: #fff;
+  --card-radius: 16px;
+  --radius-sm: 6px;
+  --radius-pill: 50px;
+  --shadow-card: 0 4px 20px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 8px 30px rgba(0,0,0,0.12);
+  --shadow-search-focus: 0 0 30px rgba(254,202,87,0.25);
+  --anim-spin: spin 0.8s linear infinite;
+  --anim-toast-in: toastIn 0.3s ease;
+  --anim-toast-out: toastOut 0.3s ease 1.7s forwards;
 }
-
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { overflow-x: hidden; overflow-y: auto; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 50%, #dce2f0 100%);
+  background: linear-gradient(135deg, var(--c-bg-start) 0%, var(--c-bg-mid) 50%, var(--c-bg-end) 100%);
   min-height: 100vh;
-  color: #333;
+  color: var(--c-text-main);
   overflow-x: hidden;
 }
-
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
 .bg-stars {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  position: fixed; inset: 0; pointer-events: none; z-index: -1;
   background:
     radial-gradient(2px 2px at 20% 30%, rgba(255,107,107,0.4), transparent),
     radial-gradient(2px 2px at 40% 70%, rgba(254,202,87,0.3), transparent),
@@ -32,67 +65,45 @@ body {
     radial-gradient(1px 1px at 50% 10%, rgba(254,202,87,0.35), transparent),
     radial-gradient(1px 1px at 90% 85%, rgba(255,107,107,0.25), transparent),
     radial-gradient(2px 2px at 30% 60%, rgba(46,213,115,0.25), transparent);
-  z-index: -1;
-  pointer-events: none;
 }
-
-.hero {
-  text-align: center;
-  padding: 60px 20px 40px;
-}
-
+.hero { text-align: center; padding: 60px 20px 40px; }
 .hero h1 {
   font-size: clamp(28px, 5vw, 48px);
   font-weight: 800;
   letter-spacing: 4px;
-  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #ff9f43 100%);
+  background: linear-gradient(135deg, var(--c-primary-start) 0%, var(--c-primary-mid) 50%, var(--c-primary-end) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 12px;
 }
-
-.hero p {
-  color: rgba(0,0,0,0.5);
-  font-size: 14px;
-  letter-spacing: 2px;
-}
-
+.hero p { color: var(--c-text-sub); font-size: 14px; letter-spacing: 2px; }
 .disclaimer {
   max-width: 520px;
   margin: 0 auto 24px;
   padding: 12px 16px;
-  background: rgba(0,0,0,0.04);
+  background: var(--c-bg-soft);
   border-radius: 8px;
   font-size: 12px;
-  color: rgba(0,0,0,0.5);
+  color: var(--c-text-sub);
   text-align: center;
   line-height: 1.6;
 }
-
-.search-wrap {
-  max-width: 520px;
-  margin: 0 auto 32px;
-  padding: 0 20px;
-  width: 100%;
-}
-
+.search-wrap { max-width: 520px; margin: 0 auto 32px; padding: 0 20px; width: 100%; }
 .search-box {
   display: flex;
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.1);
-  border-radius: 50px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-pill);
   overflow: hidden;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-card);
   width: 100%;
 }
-
 .search-box:focus-within {
-  border-color: #feca57;
-  box-shadow: 0 0 30px rgba(254,202,87,0.25), 0 4px 20px rgba(0,0,0,0.1);
+  border-color: var(--c-primary-mid);
+  box-shadow: var(--shadow-search-focus), var(--shadow-card);
 }
-
 .search-box input {
   flex: 1;
   min-width: 0;
@@ -101,13 +112,11 @@ body {
   outline: none;
   padding: 16px 24px;
   font-size: 16px;
-  color: #333;
+  color: var(--c-text-main);
 }
-
-.search-box input::placeholder { color: rgba(0,0,0,0.4); }
-
+.search-box input::placeholder { color: var(--c-text-sub); }
 .search-box button {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  background: linear-gradient(135deg, var(--c-primary-start), #ee5a24);
   border: none;
   color: #fff;
   padding: 16px 32px;
@@ -119,52 +128,26 @@ body {
   flex-shrink: 0;
   white-space: nowrap;
 }
-
-.search-box button:hover { background: linear-gradient(135deg, #ff8787, #f9703a); }
-
-.search-box button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 0 20px 60px;
-}
-
+.search-box button:hover { background: linear-gradient(135deg, var(--c-btn-hover-start), var(--c-btn-hover-end)); }
+.search-box button:disabled { opacity: 0.5; cursor: not-allowed; }
+.main { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
 .result-card {
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 16px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--card-radius);
   padding: 20px 24px;
   margin-bottom: 16px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
-
 .result-card:hover {
-  border-color: rgba(254,202,87,0.5);
+  border-color: var(--c-border-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  box-shadow: var(--shadow-card-hover);
 }
-
-.result-title {
-  font-size: 17px;
-  font-weight: 600;
-  color: #222;
-  line-height: 1.5;
-  word-break: break-word;
-  margin-bottom: 12px;
-}
-
-.result-source {
-  font-size: 12px;
-  color: rgba(0,0,0,0.45);
-  margin-bottom: 12px;
-}
-
+.result-title { font-size: 17px; font-weight: 600; color: #222; line-height: 1.5; word-break: break-word; margin-bottom: 12px; }
+.result-source { font-size: 12px; color: var(--c-text-soft); margin-bottom: 12px; }
 .source-tag {
   display: inline-block;
   padding: 4px 10px;
@@ -172,95 +155,64 @@ body {
   font-size: 11px;
   line-height: 1;
   font-weight: 500;
-  background: rgba(46,213,115,0.15);
-  color: #2ed573;
+  background: var(--c-success-soft-bg);
+  color: var(--c-success-text);
 }
-
 .answer-section {
-  background: #f8f9fa;
+  background: var(--c-bg-card);
   border-radius: 10px;
   padding: 12px 16px;
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid var(--c-border-soft);
   overflow: hidden;
 }
-
-.answer-text {
-  font-size: 14px;
-  color: #333;
-  line-height: 1.7;
-  word-break: break-all;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-}
-
-.card-footer {
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-end;
-}
-
+.answer-text { font-size: 14px; color: var(--c-text-main); line-height: 1.7; word-break: break-all; white-space: pre-wrap; overflow-wrap: break-word; }
+.card-footer { margin-top: 12px; display: flex; justify-content: flex-end; }
 .copy-btn {
   background: #fff;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid var(--c-copy-border);
   color: #555;
   padding: 6px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
-
 .copy-btn:hover {
-  background: rgba(254,202,87,0.15);
-  border-color: #feca57;
-  color: #e1b12c;
+  background: var(--c-copy-bg-hover);
+  border-color: var(--c-copy-border-hover);
+  color: var(--c-copy-text-hover);
 }
-
 .copy-btn.copied {
-  background: rgba(46,213,115,0.15);
-  border-color: #2ed573;
-  color: #2ed573;
+  background: var(--c-success-soft-bg);
+  border-color: var(--c-success-text);
+  color: var(--c-success-text);
 }
-
-.loading-state {
-  text-align: center;
-  padding: 80px 20px;
-}
-
+.loading-state { text-align: center; padding: 80px 20px; }
 .reel-spinner {
   width: 50px;
   height: 50px;
   margin: 0 auto 20px;
-  border: 3px solid rgba(255,107,107,0.2);
-  border-top-color: #ff6b6b;
+  border: 3px solid var(--c-spinner-track);
+  border-top-color: var(--c-spinner-bar);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: var(--anim-spin);
 }
-
 @keyframes spin { to { transform: rotate(360deg); } }
-
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-  color: rgba(0,0,0,0.4);
-}
-
+.empty-state { text-align: center; padding: 80px 20px; color: var(--c-text-sub); }
 .empty-state .icon { font-size: 64px; margin-bottom: 16px; }
-.empty-state p { font-size: 16px; }
-
 .toast {
   position: fixed;
   top: 30px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0,0,0,0.8);
-  color: #fff;
+  background: var(--c-toast-bg);
+  color: var(--c-toast-text);
   padding: 12px 28px;
   border-radius: 30px;
   font-size: 14px;
   z-index: 1000;
-  animation: toastIn 0.3s ease, toastOut 0.3s ease 1.7s forwards;
+  animation: var(--anim-toast-in), var(--anim-toast-out);
   pointer-events: none;
   backdrop-filter: blur(10px);
   white-space: nowrap;
@@ -268,318 +220,175 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
-
-/* ===== 移动端适配 ===== */
 @media (max-width: 640px) {
-  .hero {
-    padding: 32px 16px 20px;
-  }
-  .hero h1 {
-    font-size: 24px;
-    letter-spacing: 2px;
-  }
-  .hero p {
-    font-size: 12px;
-  }
-  .search-wrap {
-    padding: 0 16px;
-    max-width: 100%;
-    margin-bottom: 20px;
-  }
-  .search-box input {
-    padding: 12px 16px;
-    font-size: 14px;
-  }
-  .search-box button {
-    padding: 12px 16px;
-    font-size: 13px;
-  }
-  .disclaimer {
-    padding: 10px 12px;
-    font-size: 11px;
-    margin-bottom: 16px;
-    max-width: 100%;
-    margin-left: 16px;
-    margin-right: 16px;
-  }
-  .main {
-    padding: 0 16px 40px;
-  }
-  .result-card {
-    padding: 14px 16px;
-    border-radius: 12px;
-  }
-  .result-title {
-    font-size: 15px;
-    margin-bottom: 10px;
-  }
-  .result-source {
-    font-size: 11px;
-    margin-bottom: 10px;
-  }
-  .answer-section {
-    padding: 10px 12px;
-  }
-  .answer-text {
-    font-size: 13px;
-    line-height: 1.6;
-  }
-  .source-tag {
-    font-size: 10px;
-    padding: 3px 8px;
-  }
-  .copy-btn {
-    padding: 5px 10px;
-    font-size: 11px;
-  }
-  .loading-state,
-  .empty-state {
-    padding: 60px 16px;
-  }
+  .hero { padding: 32px 16px 20px; }
+  .hero h1 { font-size: 24px; letter-spacing: 2px; }
+  .hero p { font-size: 12px; }
+  .search-wrap { padding: 0 16px; max-width: 100%; margin-bottom: 20px; }
+  .search-box input { padding: 12px 16px; font-size: 14px; }
+  .search-box button { padding: 12px 16px; font-size: 13px; }
+  .disclaimer { padding: 10px 12px; font-size: 11px; margin-bottom: 16px; max-width: 100%; margin-left: 16px; margin-right: 16px; }
+  .main { padding: 0 16px 40px; }
+  .result-card { padding: 14px 16px; border-radius: 12px; }
+  .result-title { font-size: 15px; margin-bottom: 10px; }
+  .result-source { font-size: 11px; margin-bottom: 10px; }
+  .answer-section { padding: 10px 12px; }
+  .answer-text { font-size: 13px; line-height: 1.6; }
+  .source-tag { font-size: 10px; padding: 3px 8px; }
+  .copy-btn { padding: 5px 10px; font-size: 11px; }
+  .loading-state, .empty-state { padding: 60px 16px; }
   .empty-state .icon { font-size: 48px; }
-  .empty-state p { font-size: 14px; }
 }
-
-/* 超窄屏幕 (如 iPhone SE 320px) */
 @media (max-width: 374px) {
-  .hero h1 {
-    font-size: 20px;
-    letter-spacing: 1px;
-  }
-  .search-box input {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-  .search-box button {
-    padding: 10px 12px;
-    font-size: 12px;
-    letter-spacing: 0;
-  }
-  .result-card {
-    padding: 12px 12px;
-  }
-  .answer-text {
-    font-size: 12px;
-  }
+  .hero h1 { font-size: 20px; letter-spacing: 1px; }
+  .search-box input { padding: 10px 12px; font-size: 13px; }
+  .search-box button { padding: 10px 12px; font-size: 12px; letter-spacing: 0; }
+  .result-card { padding: 12px 12px; }
+  .answer-text { font-size: 12px; }
 }
-
-/* PC 大屏优化 */
 @media (min-width: 1024px) {
-  .hero {
-    padding: 80px 20px 50px;
-  }
-  .main {
-    max-width: 800px;
-  }
+  .hero { padding: 80px 20px 50px; }
+  .main { max-width: 800px; }
 }
 </style>
 </head>
 <body>
 <div class="bg-stars"></div>
-
-<div class="hero">
+<header class="hero">
   <h1>影 视 搜 索</h1>
   <p>FILM &amp; TV RESOURCE FINDER</p>
-</div>
-
+</header>
 <div class="search-wrap">
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="输入影视作品名称..." autocomplete="off">
-    <button id="searchBtn" onclick="doSearch()">搜 索</button>
+    <button id="searchBtn">搜 索</button>
   </div>
 </div>
-
 <div class="disclaimer">本站仅提供影视资源搜索链接聚合，不存储任何影片资源，所有内容均来自互联网公开渠道，版权归原作者所有。</div>
-
-<div class="main" id="results"></div>
-
+<main class="main" id="results"></main>
 <script>
-const TOKEN = 'i69';
-const API_URL = 'http://doudoupan.com/v/api/getJuzi';
+(function() {
+  const TOKEN = 'i69';
+  const API_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('http://doudoupan.com/v/api/getJuzi');
 
-let toastTimer = null;
-function showToast(msg) {
-  const existing = document.querySelector('.toast');
-  if (existing) existing.remove();
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { if (t.parentNode) t.remove(); }, 2200);
-}
-
-async function fetchApi(name) {
-  const params = new URLSearchParams({ name, token: TOKEN });
-  try {
-    // 直接请求接口，不走代理转发
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-      body: params.toString(),
-      signal: AbortSignal.timeout(15000)
-    });
-    if (!res.ok) throw new Error('请求错误: ' + res.status);
-    const data = await res.json();
-    if (data.us && data.list) return data.list;
-    return null;
-  } catch (e) {
-    console.warn('请求失败:', e.message);
-    return null;
-  }
-}
-
-function parseResult(item) {
-  const answer = item.answer || '';
-  if (!answer.includes('pan.baidu.com')) {
-    return null;
-  }
-  let title = item.question ? item.question.trim() : '';
-  if (!title) {
-    title = answer.split('\n')[0].trim();
-  }
-  return { title: title, answer: answer };
-}
-
-function dedupTitle(items) {
-  const seen = new Set();
-  return items.filter(function(item) {
-    var key = item.title.replace(/\s+/g, '');
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-var searchResultsData = [];
-
-async function doSearch() {
-  var input = document.getElementById('searchInput');
-  var name = input.value.trim();
-  if (!name) {
-    showToast('请输入影视名称');
-    return;
-  }
-
-  var resultsEl = document.getElementById('results');
-  var btn = document.getElementById('searchBtn');
-
-  resultsEl.innerHTML = '<div class="loading-state"><div class="reel-spinner"></div><div>正在搜索资源...</div></div>';
-  btn.disabled = true;
-
-  var list = await fetchApi(name);
-  var allResults = [];
-
-  if (list && list.length) {
-    for (var j = 0; j < list.length; j++) {
-      var parsed = parseResult(list[j]);
-      if (parsed) {
-        allResults.push(parsed);
-      }
+  const Toast = {
+    timer: null,
+    show(msg) {
+      const e = document.querySelector('.toast');
+      if (e) e.remove();
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => t.parentNode && t.remove(), 2200);
     }
-  }
+  };
 
-  if (allResults.length === 0) {
-    resultsEl.innerHTML =
-      '<div class="empty-state">' +
-        '<div class="icon">🎬</div>' +
-        '<p>未找到"' + escapeHtml(name) + '"的相关资源</p>' +
-        '<p style="font-size:13px;margin-top:6px;">请尝试其他关键词或检查拼写</p>' +
-      '</div>';
-    btn.disabled = false;
-    return;
-  }
+  const UI = {
+    escapeHtml(s) {
+      return s ? String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : '';
+    },
+    setLoading() {
+      document.getElementById('results').innerHTML = '<div class="loading-state"><div class="reel-spinner"></div><div>正在搜索资源...</div></div>';
+    },
+    setEmpty(name) {
+      document.getElementById('results').innerHTML = '<div class="empty-state"><div class="icon">🎬</div><p>未找到"' + this.escapeHtml(name) + '"的相关资源</p><p style="font-size:13px;margin-top:6px;">请尝试其他关键词或检查拼写</p></div>';
+    },
+    renderList(results, onCopy) {
+      const html = results.map((item, i) => 
+        '<div class="result-card"><div class="result-title">' + this.escapeHtml(item.title) + '</div><div class="result-source"><span class="source-tag">句子</span></div><div class="answer-section"><div class="answer-text">' + this.escapeHtml(item.answer) + '</div></div><div class="card-footer"><button class="copy-btn" data-index="' + i + '">复制</button></div></div>'
+      ).join('');
+      const el = document.getElementById('results');
+      el.innerHTML = html;
+      el.addEventListener('click', e => {
+        const btn = e.target.closest('.copy-btn');
+        if (btn) onCopy(Number(btn.getAttribute('data-index')), btn);
+      });
+    }
+  };
 
-  var deduped = dedupTitle(allResults);
-  renderResults(deduped);
-  btn.disabled = false;
-}
+  const Search = {
+    state: { items: [] },
+    parse(item) {
+      const answer = item.answer || '';
+      if (!answer.includes('pan.baidu.com')) return null;
+      const title = item.question ? item.question.trim() : answer.split('\n')[0].trim();
+      return { title, answer };
+    },
+    dedup(items) {
+      const seen = new Set();
+      return items.filter(item => {
+        const k = item.title.replace(/\s+/g, '');
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+    },
+    async fetch(name) {
+      const params = new URLSearchParams({ name, token: TOKEN });
+      try {
+        const res = await fetch(`${API_URL}&${params.toString()}`, { signal: AbortSignal.timeout(15000) });
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
+        return (data.us && data.list) ? data.list : null;
+      } catch (e) {
+        Toast.show('代理请求失败，请稍后重试');
+        return null;
+      }
+    },
+    async execute(name) {
+      UI.setLoading();
+      const list = await this.fetch(name);
+      const all = [];
+      if (list) for (const item of list) {
+        const p = this.parse(item);
+        if (p) all.push(p);
+      }
+      this.state.items = this.dedup(all);
+      return this.state.items;
+    },
+    async doSearch() {
+      const name = document.getElementById('searchInput').value.trim();
+      if (!name) return Toast.show('请输入影视名称');
+      const btn = document.getElementById('searchBtn');
+      btn.disabled = true;
+      const results = await this.execute(name);
+      results.length ? UI.renderList(results, this.handleCopy.bind(this)) : UI.setEmpty(name);
+      btn.disabled = false;
+    },
+    handleCopy(index, btn) {
+      const text = this.state.items[index] ? this.state.items[index].answer : '';
+      if (!text) return Toast.show('内容为空');
+      const done = () => {
+        btn.textContent = '已复制';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
+      };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(done).catch(() => this.fallbackCopy(text, done));
+      } else {
+        this.fallbackCopy(text, done);
+      }
+    },
+    fallbackCopy(text, done) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+      ta.setAttribute('readonly', '');
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      try { document.execCommand('copy'); done(); } catch (e) { Toast.show('复制失败，请手动复制'); }
+      document.body.removeChild(ta);
+    }
+  };
 
-function renderResults(results) {
-  searchResultsData = results;
-  var resultsEl = document.getElementById('results');
-  var html = '';
-
-  for (var i = 0; i < results.length; i++) {
-    var item = results[i];
-    html += '<div class="result-card">';
-    html += '<div class="result-title">' + escapeHtml(item.title) + '</div>';
-    html += '<div class="result-source">';
-    html += '<span class="source-tag">句子</span>';
-    html += '</div>';
-    html += '<div class="answer-section">';
-    html += '<div class="answer-text">' + escapeHtml(item.answer) + '</div>';
-    html += '</div>';
-    html += '<div class="card-footer">';
-    html += '<button class="copy-btn" data-index="' + i + '" onclick="copyAnswer(' + i + ')">复制</button>';
-    html += '</div>';
-    html += '</div>';
-  }
-
-  resultsEl.innerHTML = html;
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function copyAnswer(index) {
-  var btn = document.querySelector('.copy-btn[data-index="' + index + '"]');
-  if (!btn) return;
-  var text = searchResultsData[index] ? searchResultsData[index].answer : '';
-  if (!text) {
-    showToast('内容为空');
-    return;
-  }
-
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(function() {
-      markCopied(btn);
-    }).catch(function() {
-      fallbackCopy(text, btn);
-    });
-  } else {
-    fallbackCopy(text, btn);
-  }
-}
-
-function markCopied(btn) {
-  btn.textContent = '已复制';
-  btn.classList.add('copied');
-  setTimeout(function() {
-    btn.textContent = '复制';
-    btn.classList.remove('copied');
-  }, 1500);
-}
-
-function fallbackCopy(text, btn) {
-  var ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
-  ta.setAttribute('readonly', '');
-  document.body.appendChild(ta);
-  ta.select();
-  ta.setSelectionRange(0, ta.value.length);
-  try {
-    document.execCommand('copy');
-    markCopied(btn);
-  } catch (e) {
-    showToast('复制失败，请手动复制');
-  }
-  document.body.removeChild(ta);
-}
-
-document.getElementById('searchInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') doSearch();
-});
+  document.getElementById('searchBtn').addEventListener('click', () => Search.doSearch());
+  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') Search.doSearch(); });
+})();
 </script>
 </body>
 </html>
