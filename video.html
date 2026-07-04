@@ -46,6 +46,7 @@
 html { overflow-x: hidden; overflow-y: auto; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, var(--c-bg-start) 0%, var(--c-bg-bg-mid) 50%, var(--c-bg-end) 100%);
   background: linear-gradient(135deg, var(--c-bg-start) 0%, var(--c-bg-mid) 50%, var(--c-bg-end) 100%);
   min-height: 100vh;
   color: var(--c-text-main);
@@ -271,7 +272,18 @@ body {
 <script>
 (function() {
   const TOKEN = 'i69';
-  const API_URL = 'https://corsproxy.io/?url=' + encodeURIComponent('http://doudoupan.com/v/api/getJuzi');
+  // 原始接口（HTTP），在 HTTPS 页面下浏览器会拦截直接请求，必须走 CORS 代理
+  const API_BASE = 'http://doudoupan.com/v/api/getJuzi';
+
+  // 多个 CORS 代理，按顺序尝试，任一可用即返回
+  // 每个函数接收完整目标 URL（含 query），返回代理 URL
+  const CORS_PROXIES = [
+    function(url) { return 'https://corsproxy.io/?url=' + encodeURIComponent(url); },
+    function(url) { return 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url); },
+    function(url) { return 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(url); },
+    function(url) { return 'https://cors.eu.org/' + url; },
+    function(url) { return 'https://thingproxy.freeboard.io/fetch/' + url; }
+  ];
 
   const Toast = {
     timer: null,
@@ -298,11 +310,14 @@ body {
       document.getElementById('results').innerHTML = '<div class="empty-state"><div class="icon">🎬</div><p>未找到"' + this.escapeHtml(name) + '"的相关资源</p><p style="font-size:13px;margin-top:6px;">请尝试其他关键词或检查拼写</p></div>';
     },
     renderList(results, onCopy) {
-      const html = results.map((item, i) => 
+      const html = results.map((item, i) =>
         '<div class="result-card"><div class="result-title">' + this.escapeHtml(item.title) + '</div><div class="result-source"><span class="source-tag">句子</span></div><div class="answer-section"><div class="answer-text">' + this.escapeHtml(item.answer) + '</div></div><div class="card-footer"><button class="copy-btn" data-index="' + i + '">复制</button></div></div>'
       ).join('');
       const el = document.getElementById('results');
       el.innerHTML = html;
+      // 防止重复绑定
+      if (el._copyBound) return;
+      el._copyBound = true;
       el.addEventListener('click', e => {
         const btn = e.target.closest('.copy-btn');
         if (btn) onCopy(Number(btn.getAttribute('data-index')), btn);
@@ -327,17 +342,46 @@ body {
         return true;
       });
     },
-    async fetch(name) {
-      const params = new URLSearchParams({ name, token: TOKEN });
+    // 关键修复：把 name 和 token 一起编码进目标 URL，再交给代理转发
+    buildTargetUrl(name) {
+      const params = new URLSearchParams({ name: name, token: TOKEN });
+      return API_BASE + '?' + params.toString();
+    },
+    // 尝试解析 JSON，兼容某些代理返回的带额外字符的情况
+    safeParse(text) {
+      if (!text) return null;
       try {
-        const res = await fetch(`${API_URL}&${params.toString()}`, { signal: AbortSignal.timeout(15000) });
-        if (!res.ok) throw new Error(res.status);
-        const data = await res.json();
-        return (data.us && data.list) ? data.list : null;
+        return JSON.parse(text);
       } catch (e) {
-        Toast.show('代理请求失败，请稍后重试');
+        // 尝试提取第一个 JSON 对象
+        const m = text.match(/\{[\s\S]*\}/);
+        if (m) {
+          try { return JSON.parse(m[0]); } catch (e2) { return null; }
+        }
         return null;
       }
+    },
+    async fetch(name) {
+      const targetUrl = this.buildTargetUrl(name);
+
+      // 依次尝试每个代理
+      for (let i = 0; i < CORS_PROXIES.length; i++) {
+        const proxyUrl = CORS_PROXIES[i](targetUrl);
+        try {
+          const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(15000) });
+          if (!res.ok) continue;
+          const text = await res.text();
+          const data = this.safeParse(text);
+          if (data && data.us && Array.isArray(data.list)) {
+            return data.list;
+          }
+        } catch (e) {
+          // 超时或网络错误，继续尝试下一个代理
+          continue;
+        }
+      }
+      Toast.show('所有代理均请求失败，请稍后重试');
+      return null;
     },
     async execute(name) {
       UI.setLoading();
