@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>识字王大赛</title>
+<style>
+  /* ========== 基础 ========== */
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --red: #ff4d4f;
+    --orange: #ff9a3c;
+    --yellow: #ffd34d;
+    --pink: #ff6b9d;
+    --blue: #5cc8ff;
+    --green: #52c41a;
+    --purple: #8b5cf6;
+    --ink: #4a2c0a;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: "Yuanti SC", "YouYuan", "Microsoft YaHei", "KaiTi", sans-serif;
+    background: linear-gradient(135deg, #ffd34d 0%, #ff9a3c 30%, #ff6b9d 65%, #5cc8ff 100%);
+    background-attachment: fixed;
+    color: var(--ink);
+    overflow: hidden;
+    user-select: none;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+  .hidden { display: none !important; }
+
+  /* ========== Toast ========== */
+  .toast {
+    position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%);
+    background: rgba(74,44,10,.92); color: #fff;
+    padding: 12px 22px; border-radius: 30px; font-size: 17px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.3); z-index: 1000; opacity: 0;
+    transition: opacity .25s, transform .25s; pointer-events: none;
+    max-width: 92vw; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+  /* ========== 菜单 ========== */
+  .view { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
+  #view-menu { z-index: 1; }
+  .menu-school { font-size: clamp(16px, 2.8vw, 22px); font-weight: 900; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.3); margin-bottom: 4px; text-align: center; letter-spacing: 4px; }
+  .menu-title {
+    font-size: clamp(44px, 9vw, 92px); font-weight: 900; text-align: center;
+    color: #fff; text-shadow: 0 4px 0 #e07b00, 0 8px 20px rgba(0,0,0,.25);
+    -webkit-text-stroke: 2px #fff;
+    animation: bounce 1.6s ease-in-out infinite;
+    margin-bottom: 6px; line-height: 1.1;
+  }
+  .menu-sub { font-size: clamp(16px, 2.6vw, 22px); color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.3); margin-bottom: 8px; text-align: center; }
+  .menu-count {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.75); color: #d2691e;
+    font-size: clamp(15px, 2.4vw, 19px); font-weight: bold;
+    padding: 8px 20px; border-radius: 30px; margin-bottom: 26px; box-shadow: 0 4px 10px rgba(0,0,0,.12);
+  }
+  .menu-btns { display: flex; flex-direction: column; gap: 20px; width: min(420px, 92vw); }
+  .menu-btn {
+    display: flex; align-items: center; gap: 16px;
+    font-size: clamp(22px, 4.4vw, 30px); font-weight: 900; color: #fff;
+    padding: 20px 24px; border-radius: 24px; text-align: left;
+    box-shadow: 0 8px 0 rgba(0,0,0,.22), 0 12px 24px rgba(0,0,0,.2);
+    transition: transform .12s ease, box-shadow .12s ease;
+    border: 3px solid rgba(255,255,255,.5);
+  }
+  .menu-btn:hover { transform: translateY(-4px) scale(1.02); }
+  .menu-btn:active { transform: translateY(4px) scale(.98); box-shadow: 0 3px 0 rgba(0,0,0,.22); }
+  .menu-btn .emo { font-size: 1.5em; }
+  .menu-btn .tag { font-size: .55em; opacity: .95; font-weight: 700; }
+  .btn1 { background: linear-gradient(135deg, #ff9a3c, #ff7130); }
+  .btn2 { background: linear-gradient(135deg, #5cc8ff, #3a86ff); }
+  .btn3 { background: linear-gradient(135deg, #ffd34d, #ff9a3c); color: #5a3200; }
+  .menu-note { margin-top: 24px; color: rgba(255,255,255,.95); font-size: 14px; text-shadow: 0 1px 3px rgba(0,0,0,.3); text-align: center; }
+
+  /* 飘动装饰 */
+  .deco { position: absolute; font-size: clamp(28px, 5vw, 52px); opacity: .55; animation: float 4.5s ease-in-out infinite; pointer-events: none; z-index: 0; }
+  #view-menu > *:not(.deco) { position: relative; z-index: 2; }
+
+  /* ========== 关卡通用 ========== */
+  .level-head {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 14px 16px; flex-wrap: wrap;
+  }
+  .back-btn {
+    background: rgba(255,255,255,.85); color: #c0392b; font-weight: 900;
+    font-size: clamp(15px, 2.4vw, 18px); padding: 9px 18px; border-radius: 30px;
+    box-shadow: 0 4px 0 rgba(0,0,0,.15); transition: transform .1s; white-space: nowrap;
+  }
+  .back-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.15); }
+  .level-title { font-size: clamp(20px, 3.4vw, 26px); font-weight: 900; color: #fff; text-shadow: 0 3px 0 rgba(0,0,0,.22); white-space: nowrap; }
+  .round-pill {
+    background: rgba(255,255,255,.85); color: #d2691e; font-weight: 900;
+    font-size: clamp(14px, 2.2vw, 17px); padding: 8px 16px; border-radius: 30px; white-space: nowrap;
+  }
+
+  .tap-hint { position:absolute; bottom: 22px; left:50%; transform:translateX(-50%); color:#fff; font-size: clamp(15px,2.6vw,19px); font-weight:700; text-shadow:0 2px 6px rgba(0,0,0,.35); text-align:center; white-space:nowrap; animation: blink 1.4s ease-in-out infinite; }
+  .tap-zone { cursor: pointer; }
+
+  /* ========== 第一关 开火车 ========== */
+  #view-train { z-index: 10; }
+  .train-stage { display:flex; flex-direction:column; align-items:center; gap: clamp(10px,2.5vh,24px); width:100%; }
+  .train-q {
+    font-size: clamp(44px, 12vw, 150px); font-weight: 900; color:#fff;
+    text-shadow: 0 6px 0 #d2691e, 0 10px 24px rgba(0,0,0,.28);
+    text-align:center; padding: 6px 18px; opacity:0; transform: scale(.5);
+    transition: opacity .25s, transform .25s; max-width: 92vw; word-break: break-all;
+  }
+  .train-q.show { opacity:1; transform: scale(1); }
+  .train-q.pulse { animation: qpop .45s ease; }
+  .count-wrap {
+    display:none; flex-direction:column; align-items:center; gap:6px;
+  }
+  .count-wrap.show { display:flex; animation: pop .2s ease; }
+  .ring { width: clamp(96px, 18vw, 132px); height: clamp(96px, 18vw, 132px); border-radius:50%; display:flex; align-items:center; justify-content:center; background: conic-gradient(#ffd34d 0deg, rgba(255,255,255,.35) 0deg); box-shadow: 0 6px 16px rgba(0,0,0,.25); transition: background .1s linear; }
+  .ring-in { width:86%; height:86%; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; }
+  .ring-num { font-size: clamp(42px, 8vw, 60px); font-weight:900; color:#e67e22; transition: color .1s; }
+  .ring-num.red { color: var(--red); animation: blink .4s steps(2,start) infinite; }
+  .count-label { color:#fff; font-size: clamp(13px,2.4vw,16px); font-weight:700; text-shadow:0 2px 5px rgba(0,0,0,.3); }
+
+  /* ========== 第二关 抽卡片 ========== */
+  #view-cards { z-index: 10; }
+  .cards-stage { display:flex; flex-direction:column; align-items:center; gap: clamp(12px, 3vh, 26px); }
+  .card-info { display:flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .card-info span { background: rgba(255,255,255,.85); color:#2f5aa8; font-weight:900; font-size: clamp(14px,2.3vw,17px); padding:8px 16px; border-radius:30px; box-shadow:0 4px 0 rgba(0,0,0,.12); }
+  .card3d { perspective: 1400px; width: min(80vw, 360px); height: min(62vh, 460px); cursor: pointer; }
+  .card-inner { position: relative; width:100%; height:100%; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.3,.7,.3,1); }
+  .card-inner.flip { transform: rotateY(180deg); }
+  .card-face { position:absolute; inset:0; border-radius: 24px; backface-visibility:hidden; -webkit-backface-visibility:hidden; box-shadow: 0 14px 30px rgba(0,0,0,.3), 0 6px 0 rgba(0,0,0,.18); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .card-back { background: repeating-linear-gradient(45deg, #ff6b9d 0, #ff6b9d 16px, #ff9a3c 16px, #ff9a3c 32px); border: 8px solid #fff; }
+  .card-back .big { font-size: clamp(60px, 13vw, 96px); }
+  .card-back small { color:#fff; font-weight:900; font-size: clamp(14px,2.6vw,18px); text-shadow:0 2px 4px rgba(0,0,0,.3); }
+  .card-front { background: linear-gradient(160deg, #fffde7, #fff3c4); border: 10px solid #ffd34d; transform: rotateY(180deg); color:#5a3200; }
+  .card-badge { position:absolute; top:12px; left:50%; transform:translateX(-50%); background:var(--orange); color:#fff; font-size: clamp(13px,2.4vw,16px); font-weight:900; padding:6px 16px; border-radius:20px; box-shadow:0 3px 6px rgba(0,0,0,.2); white-space:nowrap; }
+  .card-word { font-size: clamp(40px, 9vw, 84px); font-weight:900; text-align:center; padding: 8px 20px; word-break: break-all; }
+  .card-hint { color:#a06a00; font-size: clamp(13px,2.4vw,16px); font-weight:700; margin-top: 12px; text-align:center; }
+  .card-actions { display:flex; gap: 14px; flex-wrap: wrap; justify-content:center; }
+  .small-btn {
+    background:#fff; color:#c0392b; font-weight:900; font-size: clamp(15px,2.6vw,18px);
+    padding: 12px 22px; border-radius:30px; box-shadow:0 5px 0 rgba(0,0,0,.16);
+    transition: transform .1s; 
+  }
+  .small-btn:active { transform: translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.16); }
+  .small-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+  /* ========== 第三关 识字王者 ========== */
+  #view-king { z-index: 10; }
+  .king-stage { display:flex; flex-direction:column; align-items:center; gap: clamp(10px,2.4vh,20px); width:100%; }
+  .king-reel-wrap { position: relative; width: min(88vw, 460px); height: clamp(150px, 34vh, 250px); border-radius: 26px; overflow:hidden; background: rgba(255,255,255,.18); border: 5px solid rgba(255,255,255,.85); box-shadow: 0 12px 30px rgba(0,0,0,.25); }
+  .king-reel { position:relative; width:100%; height:100%; overflow:hidden; }
+  .reel-slot { position:absolute; left:0; width:100%; height:76px; display:flex; align-items:center; justify-content:center; font-size: clamp(26px, 6vw, 44px); font-weight:900; color:#4a2c0a; text-shadow: 0 1px 0 rgba(255,255,255,.6); will-change: transform; }
+  .reel-slot.called { color: #1a8a03; }
+  .reel-slot.center { background: rgba(255,214,0,.75); border-top: 3px dashed #fff; border-bottom: 3px dashed #fff; color:#4a2c0a; transform-origin:center; }
+  .reel-slot.picked { background: linear-gradient(90deg, #ffd700, #fff3a0); color:#b8860b; animation: glowPulse .8s ease-in-out infinite; }
+  .reel-guide { pointer-events:none; position:absolute; left:0; right:0; top:50%; height:76px; transform:translateY(-50%); border-top:3px dashed rgba(255,255,255,.9); border-bottom:3px dashed rgba(255,255,255,.9); z-index:2; }
+  .king-actions { display:flex; gap: 12px; flex-wrap:wrap; justify-content:center; }
+  .k-btn { color:#fff; font-weight:900; font-size: clamp(16px,2.8vw,19px); padding: 13px 24px; border-radius: 30px; box-shadow: 0 5px 0 rgba(0,0,0,.2); transition: transform .1s; }
+  .k-btn:active { transform: translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.2); }
+  .k-btn:disabled { opacity:.35; cursor:not-allowed; }
+  .k-start { background: linear-gradient(135deg,#52c41a,#3cb616); }
+  .k-stop { background: linear-gradient(135deg,#ff4d4f,#e3342f); }
+  .k-cont { background: linear-gradient(135deg,#5cc8ff,#3a86ff); }
+  .k-reset { background: linear-gradient(135deg,#8b5cf6,#6d3fd1); }
+  .king-count { background: rgba(255,255,255,.85); color:#5a3200; font-weight:900; font-size: clamp(14px,2.4vw,17px); padding: 8px 18px; border-radius: 30px; }
+  .result-pop {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(.4);
+    background: linear-gradient(160deg, #fff8e1, #ffe082); border: 6px solid #ffd700;
+    border-radius: 26px; padding: clamp(20px, 4vw, 32px) clamp(24px,6vw,48px);
+    box-shadow: 0 18px 50px rgba(0,0,0,.4); text-align:center; z-index: 5;
+    opacity: 0; pointer-events:none; transition: transform .35s cubic-bezier(.3,1.4,.4,1), opacity .25s;
+    max-width: 90vw;
+  }
+  .result-pop.show { opacity:1; transform: translate(-50%, -50%) scale(1); pointer-events:auto; }
+  .result-t { font-size: clamp(30px, 8vw, 68px); font-weight:900; color: #e07b00; text-shadow: 0 3px 0 #fff, 0 6px 14px rgba(0,0,0,.18); line-height:1.1; white-space: nowrap; }
+  .spark { position:absolute; font-size: clamp(20px,4vw,34px); animation: sparkle .9s ease; }
+
+  /* ========== 动画 ========== */
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  @keyframes float { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-18px) rotate(5deg)} }
+  @keyframes pop { 0%{transform:scale(.6);opacity:0} 100%{transform:scale(1);opacity:1} }
+  @keyframes qpop { 0%{transform:scale(1)} 40%{transform:scale(1.14)} 100%{transform:scale(1)} }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.45} }
+  @keyframes glowPulse { 0%,100%{box-shadow:0 0 6px #ffd700} 50%{box-shadow:0 0 22px #ffd700} }
+  @keyframes sparkle { 0%{opacity:0;transform:translateY(8px) scale(.4)} 30%{opacity:1} 100%{opacity:0;transform:translateY(-46px) scale(1.5)} }
+
+  @media (max-width: 520px), (max-height: 560px) {
+    .menu-btns { gap: 12px; }
+    .menu-btn { padding: 14px 18px; }
+    .card3d { width: min(82vw, 300px); height: 58vh; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 全局提示 -->
+<div id="toast" class="toast"></div>
+
+<!-- ============ 首页 ============ -->
+<section id="view-menu" class="view">
+  <span class="deco" style="top:8%; left:6%; animation-delay:.2s">🎈</span>
+  <span class="deco" style="top:14%; right:8%; animation-delay:1s">⭐</span>
+  <span class="deco" style="bottom:16%; left:10%; animation-delay:.6s">🎨</span>
+  <span class="deco" style="bottom:10%; right:12%; animation-delay:1.4s">🎵</span>
+  <span class="deco" style="top:42%; left:3%; animation-delay:.9s">🌈</span>
+  <span class="deco" style="top:36%; right:4%; animation-delay:.4s">☀️</span>
+
+  <div class="menu-school">🏫 鲁巷实验小学 · 一年级8班</div>
+  <div class="menu-title">识字王大赛</div>
+  <div class="menu-sub">看谁认得多、认得快、最闪亮！🌟</div>
+  <div class="menu-count" id="menu-count">📚 考题加载中…</div>
+
+  <div class="menu-btns">
+    <button class="menu-btn btn1" data-level="train"><span class="emo">🚂</span><span>第一关<span class="tag"><br>开火车 · 5秒倒计时</span></span></button>
+    <button class="menu-btn btn2" data-level="cards"><span class="emo">🃏</span><span>第二关<span class="tag"><br>抽卡片 · 翻牌认字</span></span></button>
+    <button class="menu-btn btn3" data-level="king"><span class="emo">👑</span><span>第三关<span class="tag"><br>识字王者 · 滚动认读</span></span></button>
+  </div>
+  <div class="menu-note">💡 考题已内置，想换题库请编辑 index.html 里的考题列表</div>
+</section>
+
+<!-- ============ 第一关 开火车 ============ -->
+<section id="view-train" class="view tap-zone hidden">
+  <div class="level-head">
+    <button class="back-btn" id="train-back">🏠 返回</button>
+    <div class="level-title">第一关 · 开火车 🚂</div>
+    <div class="round-pill" id="train-round">准备中…</div>
+  </div>
+  <div class="train-stage">
+    <div class="train-q" id="train-q">🚂</div>
+    <div class="count-wrap" id="train-count">
+      <div class="ring" id="train-ring"><div class="ring-in"><div class="ring-num" id="train-ringnum">5</div></div></div>
+      <div class="count-label">⏳ 倒计时 · 请大声读出来！</div>
+    </div>
+  </div>
+  <div class="tap-hint" id="train-hint">👆 点击屏幕出题</div>
+</section>
+
+<!-- ============ 第二关 抽卡片 ============ -->
+<section id="view-cards" class="view hidden">
+  <div class="level-head">
+    <button class="back-btn" id="cards-back">🏠 返回</button>
+    <div class="level-title">第二关 · 抽卡片 🃏</div>
+    <div class="round-pill" id="cards-round">准备中…</div>
+  </div>
+  <div class="cards-stage">
+    <div class="card-info">
+      <span id="cards-info">已抽 0 张</span>
+      <span id="cards-remain">剩余 0 张</span>
+    </div>
+    <div class="card3d tap-zone" id="cards-card">
+      <div class="card-inner" id="cards-inner">
+        <div class="card-face card-back">
+          <div class="big">🃏</div>
+          <small>点击抽一张</small>
+        </div>
+        <div class="card-face card-front">
+          <div class="card-badge" id="cards-badge">第 1 张 / 共 0 张</div>
+          <div class="card-word" id="cards-word">🃏</div>
+          <div class="card-hint">👆 点击翻下一张</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-actions">
+      <button class="small-btn" id="cards-swap" disabled>🎲 换一张</button>
+      <button class="small-btn" id="cards-clean">🧹 重开本轮</button>
+    </div>
+  </div>
+  <div class="tap-hint">👆 点击卡片抽下一题</div>
+</section>
+
+<!-- ============ 第三关 识字王者 ============ -->
+<section id="view-king" class="view hidden">
+  <div class="level-head">
+    <button class="back-btn" id="king-back">🏠 返回</button>
+    <div class="level-title">第三关 · 识字王者 👑</div>
+    <div class="round-pill" id="king-count">已认读 0 / 0</div>
+  </div>
+  <div class="king-stage">
+    <div class="king-reel-wrap">
+      <div class="reel-guide"></div>
+      <div class="king-reel" id="king-reel"></div>
+    </div>
+    <div class="king-actions">
+      <button class="k-btn k-start" id="king-start">▶ 开始滚动</button>
+      <button class="k-btn k-stop" id="king-stop" style="display:none">⏹ 停止</button>
+      <button class="k-btn k-cont" id="king-continue" style="display:none">➡ 继续滚动</button>
+      <button class="k-btn k-reset" id="king-reset">🔄 重置全部</button>
+    </div>
+    <div id="king-hint" class="menu-note" style="color:#fff">👆 点击「开始滚动」，再点「停止」选中一位同学来认读</div>
+  </div>
+  <div class="result-pop" id="king-result">
+    <div class="result-t" id="king-result-name">✨</div>
+  </div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+  const $ = function (s) { return document.querySelector(s); };
+
+  /* ================= 基础工具 ================= */
+  function shuffle(arr) { // 随机打乱（返回新数组）
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function mod(n, m) { return ((n % m) + m) % m; }
+  function truncate(s, n) { // 长文本截断显示
+    s = String(s);
+    return s.length > n ? s.slice(0, n) + "…" : s;
+  }
+  let AC = null;
+  function tone(freq, dur, type, vol) { // 轻量提示音（可选）
+    try {
+      if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = type || "sine"; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || 0.18, AC.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + (dur || 0.08));
+      o.connect(g); g.connect(AC.destination);
+      o.start(); o.stop(AC.currentTime + (dur || 0.08));
+    } catch (e) { /* 无音频环境静默 */ }
+  }
+
+  /* ================= 数据（内置，来自 names.txt） ================= */
+  let questions = [
+    "陈盛欣",
+    "代毅然",
+    "邓沐易",
+    "杜沐宸",
+    "杜茗瀚",
+    "封茗汐",
+    "顾云舒",
+    "何珈遇",
+    "何梓萌",
+    "侯雅杺",
+    "黄睿涵",
+    "黄梓祺",
+    "金树延",
+    "金熠辰",
+    "李恒宇",
+    "李慕兮",
+    "李煜麒",
+    "李月桐",
+    "李泽宇",
+    "李子浩",
+    "刘安然",
+    "刘夕昀",
+    "刘彦希",
+    "刘子逸",
+    "刘梓睿",
+    "刘梓翔",
+    "吕文熠",
+    "聂晗希",
+    "尚子闻",
+    "施伽俪",
+    "宋科晟",
+    "孙慕洵",
+    "孙琳晰",
+    "汪诗涵",
+    "王博轩",
+    "王玥壹",
+    "魏文琰",
+    "辛黛维",
+    "熊思睿",
+    "杨依墨",
+    "杨轶然",
+    "杨毅",
+    "殷猷洋",
+    "张敦悦",
+    "张景然",
+    "张天翊",
+    "张煦朝",
+    "周小涵",
+    "周中睿",
+    "朱鸣阳",
+    "朱维安",
+    "邹谨渝",
+    "邹宇恒"
+  ];
+  const toast = $("#toast");
+  let toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove("show"); }, 2400);
+  }
+
+  function updateMenuCount() {
+    $("#menu-count").textContent = "📚 当前题库已有 " + questions.length + " 题";
+  }
+
+  /* ================= 视图切换 ================= */
+  let currentView = "menu";
+  function showView(name) {
+    leaveLevel(currentView);
+    ["menu", "train", "cards", "king"].forEach(function (v) {
+      $("#view-" + v).classList.toggle("hidden", v !== name);
+    });
+    currentView = name;
+    if (name === "train") enterTrain();
+    if (name === "cards") enterCards();
+    if (name === "king") enterKing();
+  }
+  function leaveLevel(name) {
+    if (name === "train") leaveTrain();
+    if (name === "cards") leaveCards();
+    if (name === "king") leaveKing();
+  }
+
+  /* ================= 第一关：开火车 ================= */
+  const trainQ = $("#train-q"), trainCount = $("#train-count"), trainRing = $("#train-ring"),
+        trainRingNum = $("#train-ringnum"), trainRoundLabel = $("#train-round"), trainHint = $("#train-hint");
+  let trainOrder = [], trainRound = 1, trainPos = 0, trainCounting = false, cdTimer = null, cdEnd = 0, cdTotal = 5000, cdLastSec = 5;
+
+  function enterTrain() {
+    if (!questions.length) { trainRoundLabel.textContent = "暂无考题"; showToast("暂无考题，请在 index.html 里添加 🥺"); return; }
+    trainRound = 1; trainPos = 0; trainCounting = false; clearInterval(cdTimer);
+    trainOrder = shuffle(questions);
+    trainQ.classList.remove("show"); trainCount.classList.remove("show");
+    trainUpdateHeader(); trainHint.textContent = "👆 点击屏幕出题";
+  }
+  function leaveTrain() { clearInterval(cdTimer); trainCounting = false; }
+  function trainUpdateHeader() {
+    const len = trainOrder.length;
+    if (!len) { trainRoundLabel.textContent = "暂无考题"; return; }
+    if (trainCounting) trainRoundLabel.textContent = "第 " + trainRound + " 轮 · " + (trainPos + 1) + "/" + len;
+    else if (trainPos < len) trainRoundLabel.textContent = "第 " + trainRound + " 轮 · 下一题 " + (trainPos + 1) + "/" + len;
+    else trainRoundLabel.textContent = "第 " + trainRound + " 轮 · 出完啦 ✨";
+  }
+  function trainTap() {
+    if (!questions.length) return;
+    if (trainCounting) { // 倒计时未结束点击：视为本题已出完，跳到下一题
+      clearInterval(cdTimer);
+      trainCounting = false;
+      trainCount.classList.remove("show");
+      trainPos++;
+    }
+    tone(660, 0.07, "sine", 0.12);
+    if (trainPos >= trainOrder.length) { // 出完一轮，重新打乱进入下一轮
+      trainOrder = shuffle(questions); trainRound++; trainPos = 0;
+      tone(880, 0.14, "triangle", 0.16);
+    }
+    const text = trainOrder[trainPos];
+    trainQ.textContent = truncate(text, 20);
+    trainQ.classList.add("show"); trainQ.classList.remove("pulse");
+    void trainQ.offsetWidth;
+    trainQ.classList.add("pulse"); // 点击反馈：缩放跳动
+    trainHint.textContent = "💨 倒计时中也可点击直接跳到下一题";
+    startCountdown();
+    trainUpdateHeader();
+  }
+  function startCountdown() {
+    trainCounting = true; clearInterval(cdTimer);
+    cdEnd = performance.now() + cdTotal; cdLastSec = 6;
+    trainCount.classList.add("show");
+    cdTimer = setInterval(updateCountdown, 100);
+    updateCountdown();
+  }
+  function updateCountdown() {
+    const left = cdEnd - performance.now();
+    if (left <= 0) { finishCountdown(); return; }
+    const sec = Math.ceil(left / 1000);
+    if (sec !== cdLastSec) { cdLastSec = sec; tone(900 + (5 - sec) * 60, 0.07, "sine", 0.1); }
+    const frac = 1 - left / cdTotal;
+    trainRing.style.background = "conic-gradient(" + (left <= 2000 ? "#ff4d4f" : "#ffd34d") + " " + (frac * 360) + "deg, rgba(255,255,255,.35) 0deg)";
+    trainRingNum.textContent = sec;
+    trainRingNum.classList.toggle("red", left <= 2000);
+  }
+  function finishCountdown() {
+    clearInterval(cdTimer); trainCounting = false;
+    tone(523, 0.28, "triangle", 0.16);
+    trainQ.classList.remove("show");
+    trainCount.classList.remove("show");
+    trainPos++;
+    trainHint.textContent = trainPos < trainOrder.length ? "👆 点击屏幕出下一题" : "👆 本轮出完啦，点击开始新一轮 ✨";
+    trainUpdateHeader();
+  }
+
+  /* ================= 第二关：抽卡片 ================= */
+  const cardsInner = $("#cards-inner"), cardsWord = $("#cards-word"), cardsBadge = $("#cards-badge"),
+        cardsInfo = $("#cards-info"), cardsRemain = $("#cards-remain"), cardsRound = $("#cards-round"),
+        cardsSwap = $("#cards-swap"), cardsClean = $("#cards-clean");
+  let cardOrder = [], cardRound = 1, cardPos = 0, cardDrawn = 0, cardCurrent = "", cardFront = false, cardBusy = false;
+
+  function enterCards() {
+    if (!questions.length) { cardsRound.textContent = "暂无考题"; showToast("暂无考题，请在 index.html 里添加 🥺"); return; }
+    cardRound = 1; cardPos = 0; cardDrawn = 0; cardBusy = false;
+    cardOrder = shuffle(questions);
+    cardFront = false; cardsInner.classList.remove("flip");
+    cardsWord.textContent = "🃏";
+    cardsUpdate(); cardsSwap.disabled = true;
+  }
+  function leaveCards() { cardBusy = false; }
+  function cardsUpdate() {
+    const total = cardOrder.length;
+    cardsRound.textContent = "第 " + cardRound + " 轮 · 共 " + total + " 题";
+    cardsInfo.textContent = "已抽 " + cardDrawn + " 张";
+    const remain = total - cardPos + (cardFront ? 1 : 0);
+    cardsRemain.textContent = "剩余 " + Math.max(0, remain) + " 张";
+    if (cardFront) cardsBadge.textContent = "第 " + cardDrawn + " 张 / 共 " + total + " 张";
+    cardsSwap.disabled = !cardFront;
+  }
+  function cardsDraw() {
+    if (cardBusy || !questions.length) return;
+    if (cardPos >= cardOrder.length) { // 出完一轮，重新打乱
+      cardOrder = shuffle(questions); cardRound++; cardPos = 0; cardDrawn = 0;
+      tone(880, 0.15, "triangle", 0.16);
+    }
+    tone(660, 0.06, "sine", 0.12);
+    cardCurrent = cardOrder[cardPos]; cardPos++;
+    cardDrawn++;
+    cardsWord.textContent = truncate(cardCurrent, 20);
+    cardBusy = true;
+    const flipForward = function () { // 平滑翻到正面（先复位再翻转，保证动画完整）
+      cardsInner.classList.remove("flip");
+      void cardsInner.offsetWidth; // 强制重排，让翻牌动画每次都重新播放
+      cardsInner.classList.add("flip");
+      cardFront = true;
+      cardsUpdate();
+      setTimeout(function () { cardBusy = false; }, 340);
+    };
+    if (cardFront) { // 上一张已翻开：先收回牌堆，再翻出下一张
+      cardsInner.classList.remove("flip");
+      cardFront = false;
+      cardsUpdate();
+      setTimeout(flipForward, 270);
+    } else {
+      flipForward();
+    }
+  }
+  function cardTap() {
+    if (cardBusy || !questions.length) return;
+    cardsDraw(); // 每次点击：收走上张、翻出下一张
+  }
+  function cardsSwapOne() { // 换一张：当前题放回卡堆末尾
+    if (!cardFront || cardBusy) return;
+    cardOrder.push(cardCurrent);
+    tone(520, 0.06, "sine", 0.12);
+    cardBusy = true;
+    cardsInner.classList.remove("flip");
+    cardFront = false;
+    cardsUpdate();
+    setTimeout(function () { cardBusy = false; cardsDraw(); }, 270);
+  }
+  function cardsCleanRound() { // 重开本轮
+    if (cardBusy) return;
+    cardRound = 1; cardPos = 0; cardDrawn = 0; cardOrder = shuffle(questions);
+    cardFront = false; cardsInner.classList.remove("flip");
+    cardsWord.textContent = "🃏"; cardsUpdate();
+    showToast("🃏 牌堆已重新洗牌！");
+  }
+
+  /* ================= 第三关：识字王者 ================= */
+  const reel = $("#king-reel"), kingCount = $("#king-count"), kingHint = $("#king-hint"),
+        startBtn = $("#king-start"), stopBtn = $("#king-stop"), contBtn = $("#king-continue"), resetBtn = $("#king-reset"),
+        resultPop = $("#king-result"), resultName = $("#king-result-name");
+  const SLOT_H = 76, POOL = 8, CENTER_D = 77; // 76 槽高，(高度-槽高)/2=77 居中线偏移
+  let reelSlots = [], kingList = [], called = new Set(), spinIdx = 0;
+  let kingState = "idle", kingSpeed = 0, kingOffset = 0, kingTarget = 0, kingDecel = false, kingLast = 0, kingRAF = null, winningIdx = -1;
+
+  function buildSlots() { // 虚拟槽：只渲染屏幕附近的一小批，省内存
+    reel.innerHTML = "";
+    reelSlots = [];
+    for (let i = 0; i < POOL; i++) {
+      const d = document.createElement("div");
+      d.className = "reel-slot";
+      reel.appendChild(d); reelSlots.push(d);
+    }
+  }
+  function namedNameAt(idx) { return kingList[mod(idx, kingList.length)]; }
+  function renderKing() {
+    if (!kingList.length) return;
+    const wrap = kingList.length * SLOT_H;
+    const off = kingOffset % SLOT_H;
+    const base = Math.floor(kingOffset / SLOT_H);
+    const visibleFrom = -3; // 显示范围 [-3, +4]
+    const pickIdx = Math.floor((kingOffset + CENTER_D) / SLOT_H);
+    for (let k = visibleFrom; k < visibleFrom + POOL; k++) {
+      const el = reelSlots[k - visibleFrom];
+      const abs = base + k;
+      const name = namedNameAt(abs);
+      el.textContent = truncate(name, 12);
+      el.style.transform = "translateY(" + (k * SLOT_H - off) + "px)";
+      el.className = "reel-slot";
+      if (called.has(name)) el.classList.add("called");
+      if (abs === pickIdx) el.classList.add("center");
+      if (abs === winningIdx) el.classList.add("picked");
+    }
+  }
+  function kingLoop() {
+    const now = performance.now();
+    const dt = Math.min(0.05, (now - kingLast) / 1000); kingLast = now;
+    const wrap = kingList.length * SLOT_H;
+    if (kingState === "scroll") {
+      if (kingDecel) { // 停止减速：摩擦力逐渐减速
+        kingSpeed -= kingSpeed * 5.5 * dt;
+        if (kingSpeed < 46) enterSnap();
+      }
+      kingOffset += kingSpeed * dt;
+      if (kingOffset >= wrap) kingOffset -= wrap;
+      renderKing();
+    } else if (kingState === "snap") { // 减速停止后，平滑吸附到最近的槽位
+      let diff = mod(kingTarget - kingOffset, wrap);
+      if (diff > wrap / 2) diff -= wrap;
+      kingOffset += diff * Math.min(1, dt * 12);
+      if (Math.abs(diff) < 0.4) { kingOffset = kingTarget; finishKingStop(); }
+      renderKing();
+    }
+    kingRAF = requestAnimationFrame(kingLoop);
+  }
+  function startKingRoll() {
+    if (!kingList.length || kingState !== "idle") return;
+    if (kingList.length < 2) { announceKing(kingList[0]); return; }
+    tone(700, 0.08, "sine", 0.12);
+    resultPop.classList.remove("show");
+    kingState = "scroll"; kingDecel = false; winningIdx = -1;
+    kingSpeed = 950;
+    kingLast = performance.now();
+    cancelAnimationFrame(kingRAF);
+    renderKing(); kingRAF = requestAnimationFrame(kingLoop);
+    syncKingButtons();
+  }
+  function stopKingRoll() {
+    if (kingState !== "scroll" || kingDecel) return;
+    tone(440, 0.08, "sine", 0.14);
+    kingDecel = true;
+    stopBtn.disabled = true;
+  }
+  function enterSnap() {
+    kingState = "snap";
+    const wrap = kingList.length * SLOT_H;
+    const pickIdx = Math.floor((kingOffset + CENTER_D) / SLOT_H);
+    kingTarget = pickIdx * SLOT_H - CENTER_D;
+    kingTarget = mod(kingTarget, wrap);
+  }
+  function finishKingStop() {
+    kingState = "idle"; kingSpeed = 0; kingDecel = false;
+    cancelAnimationFrame(kingRAF);
+    winningIdx = Math.floor((kingOffset + CENTER_D) / SLOT_H);
+    const name = namedNameAt(winningIdx);
+    called.add(name);
+    announceKing(name);
+    renderKing();
+    syncKingButtons();
+  }
+  function announceKing(name) { // 选人认读庆祝
+    resultName.textContent = "🎉 " + truncate(name, 14) + " 🎉";
+    resultPop.classList.remove("show");
+    spawnSparkles();
+    tone(523, 0.12, "triangle", 0.15); setTimeout(function () { tone(659, 0.12, "triangle", 0.15); }, 120);
+    setTimeout(function () { tone(784, 0.22, "triangle", 0.15); }, 240);
+    setTimeout(function () { resultPop.classList.add("show"); }, 320);
+  }
+  function spawnSparkles() {
+    const pos = { x: innerWidth / 2, y: innerHeight / 2 };
+    for (let i = 0; i < 10; i++) {
+      const s = document.createElement("span");
+      s.className = "spark"; s.textContent = ["🎊", "⭐", "✨", "💫", "🎉"][i % 5];
+      s.style.left = (pos.x + (Math.random() - 0.5) * 240) + "px";
+      s.style.top = (pos.y + (Math.random() - 0.5) * 180) + "px";
+      s.style.animationDelay = (Math.random() * 0.3) + "s";
+      s.style.pointerEvents = "none";
+      document.body.appendChild(s);
+      setTimeout(function () { s.remove(); }, 1200);
+    }
+  }
+  function enterKing() {
+    if (!questions.length) { kingCount.textContent = "暂无考题"; showToast("暂无考题，请在 index.html 里添加 🥺"); return; }
+    called = new Set(); spinIdx = 0;
+    kingState = "idle"; kingSpeed = 0; kingOffset = 0; winningIdx = -1; kingDecel = false;
+    kingList = shuffle(questions);
+    buildSlots(); resultPop.classList.remove("show"); renderKing(); syncKingButtons();
+    if (kingList.length < 2) { // 只有一个名字：直接公告
+      kingHint.textContent = "⚠️ 题库只有一题";
+      const only = kingList[0];
+      called.add(only); winningIdx = 0;
+      resultName.textContent = "🎉 " + truncate(only, 14) + " 🎉";
+      resultPop.classList.add("show");
+      syncKingButtons();
+    } else kingHint.textContent = "👆 点击「开始滚动」，再点「停止」选中一位同学来认读";
+  }
+  function leaveKing() { kingState = "idle"; cancelAnimationFrame(kingRAF); }
+  function syncKingButtons() {
+    const single = kingList.length < 2;
+    startBtn.style.display = (kingState === "idle" && !single) ? "" : "none";
+    stopBtn.style.display = (kingState === "scroll" && !kingDecel) ? "" : "none";
+    contBtn.style.display = (kingState === "idle" && !single && called.size) ? "" : "none";
+    resetBtn.style.display = "inline-block";
+    stopBtn.disabled = false;
+    const total = kingList.length;
+    kingCount.textContent = "已认读 " + called.size + " / " + total;
+    if (total && called.size >= total) {
+      kingHint.textContent = "🎉 全部认完啦！点「重置全部」再来一轮";
+    }
+  }
+  function kingContinue() {
+    if (kingList.length < 2) return;
+    resultPop.classList.remove("show");
+    startKingRoll();
+  }
+  function kingReset() {
+    if (kingState !== "idle") return;
+    resultPop.classList.remove("show");
+    called = new Set(); winningIdx = -1; kingOffset = 0;
+    kingList = shuffle(questions);
+    renderKing(); syncKingButtons();
+    showToast("🔁 已重新洗牌并清零认读记录！");
+  }
+
+  /* ================= 事件绑定 ================= */
+  document.querySelector(".menu-btns").addEventListener("click", function (e) {
+    const b = e.target.closest(".menu-btn");
+    if (!b) return;
+    if (!questions.length) { showToast("😥 暂无考题，请在 index.html 里添加"); return; }
+    showView(b.dataset.level);
+    tone(660, 0.1, "sine", 0.14);
+  });
+  $("#view-menu .menu-btns").addEventListener("click", function (e) { e.stopPropagation(); });
+
+  // 首页
+  const viewMenu = $("#view-menu");
+  viewMenu.addEventListener("click", function (e) {
+    if (e.target.closest(".menu-btn")) { /* 由 buttons 处理 */ }
+  });
+
+  // 第一关
+  $("#view-train").addEventListener("click", function (e) {
+    if (e.target.closest(".back-btn") || e.target.closest(".round-pill")) return;
+    trainTap();
+  });
+  $("#train-back").addEventListener("click", function () { showView("menu"); tone(500, 0.08, "sine", 0.12); });
+
+  // 第二关
+  $("#view-cards").addEventListener("click", function (e) {
+    if (e.target.closest(".back-btn") || e.target.closest(".round-pill") || e.target.closest("button")) return;
+    if (!e.target.closest(".card3d")) return;
+    cardTap();
+  });
+  $("#cards-back").addEventListener("click", function () { showView("menu"); tone(500, 0.08, "sine", 0.12); });
+  cardsSwap.addEventListener("click", function (e) { e.stopPropagation(); cardsSwapOne(); });
+  cardsClean.addEventListener("click", function (e) { e.stopPropagation(); cardsCleanRound(); });
+
+  // 第三关
+  startBtn.addEventListener("click", startKingRoll);
+  stopBtn.addEventListener("click", stopKingRoll);
+  contBtn.addEventListener("click", kingContinue);
+  resetBtn.addEventListener("click", kingReset);
+  resultPop.addEventListener("click", function (e) { e.stopPropagation(); });
+  $("#king-back").addEventListener("click", function () { showView("menu"); tone(500, 0.08, "sine", 0.12); });
+
+  // 键盘：空格当作「点屏幕」（老师投屏遥控方便）
+  document.addEventListener("keydown", function (e) {
+    if (e.code !== "Space" && e.code !== "Enter") return;
+    if (e.target.tagName === "BUTTON") return;
+    if (currentView === "train") { e.preventDefault(); trainTap(); }
+    else if (currentView === "cards") { e.preventDefault(); cardTap(); }
+    else if (currentView === "king") {
+      e.preventDefault();
+      if (kingState === "idle") { if (called.size && resultPop.classList.contains("show")) kingContinue(); else startKingRoll(); }
+      else if (kingState === "scroll" && !kingDecel) stopKingRoll();
+    }
+  });
+
+  // 页面离开前清理定时器
+  window.addEventListener("beforeunload", function () {
+    clearInterval(cdTimer); cancelAnimationFrame(kingRAF);
+  });
+
+  /* ================= 启动 ================= */
+  updateMenuCount();
+})();
+</script>
+</body>
+</html>
