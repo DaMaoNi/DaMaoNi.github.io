@@ -153,6 +153,37 @@
     }
     .chan.cctv5 { color: #fff; background: var(--red); }
 
+    /* CCTV5 / CCTV5+ 播放按钮：固定在每行右侧，PC / 手机一致 */
+    .m-play {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-self: center;
+    }
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1;
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+      box-shadow: 0 1px 4px rgba(15, 95, 189, 0.35);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .play-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(15, 95, 189, 0.45);
+    }
+    .play-btn .tri { font-size: 9px; }
+
     /* ---------------- 状态 ---------------- */
     .state {
       text-align: center;
@@ -190,6 +221,11 @@
       .brand h1 { font-size: 16px; }
       .m-time { flex-basis: 44px; font-size: 13px; }
       .day-title { top: 96px; }
+      /* 手机端：按钮收窄，仍固定在右侧，避免挤压球队名 */
+      .match { gap: 10px; padding: 12px; }
+      .m-play { gap: 5px; }
+      .play-btn { padding: 4px 9px; font-size: 11px; gap: 3px; }
+      .play-btn .tri { font-size: 8px; }
     }
   </style>
 </head>
@@ -432,20 +468,39 @@
       }
 
       var chans = channels(it.channels);
+      var plays = [];
       if (chans.length) {
         var box = document.createElement('div');
         box.className = 'm-channels';
+        var hasC5 = false, hasC5P = false; // 每场比赛每种按钮最多一个
         for (var i = 0; i < chans.length; i++) {
+          var up = chans[i].toUpperCase().replace(/＋/g, '+'); // 兼容全角＋
+          var isC5Plus = up.indexOf('CCTV5+') !== -1; // 先判断 5+，避免被 CCTV5 规则误判
+          var isC = isC5Plus || up.indexOf('CCTV5') !== -1;
           var c = document.createElement('span');
-          var isC = chans[i].toUpperCase().indexOf('CCTV5') !== -1;
           c.className = 'chan' + (isC ? ' cctv5' : '');
           c.textContent = chans[i];
           box.appendChild(c);
+          if (isC5Plus && !hasC5P) {
+            hasC5P = true;
+            plays.push(playLink('CCTV5+', 'https://tv.cctv.com/live/cctv5plus/'));
+          } else if (isC && !isC5Plus && !hasC5) {
+            hasC5 = true;
+            plays.push(playLink('CCTV5', 'https://tv.cctv.com/live/cctv5/'));
+          }
         }
         main.appendChild(box);
       }
 
       li.appendChild(main);
+
+      // 播放按钮固定在每行右侧，位置一致、不被频道列表挤走
+      if (plays.length) {
+        var playBox = document.createElement('div');
+        playBox.className = 'm-play';
+        for (var p = 0; p < plays.length; p++) playBox.appendChild(plays[p]);
+        li.appendChild(playBox);
+      }
 
       return li;
     }
@@ -469,7 +524,24 @@
 
     function channels(raw) {
       if (!raw) return [];
-      return raw.split(/\s+/).filter(Boolean);
+      // 除空白外，也支持 、 ， , / | ； ; 等常见分隔符（保留 + 以便识别 CCTV5+）
+      return raw.split(/[\s、,，/|;；]+/).filter(Boolean);
+    }
+
+    function playLink(label, href) {
+      var a = document.createElement('a');
+      a.className = 'play-btn';
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.title = '观看 ' + label + ' 直播';
+      a.setAttribute('aria-label', '观看 ' + label + ' 直播');
+      var tri = document.createElement('span');
+      tri.className = 'tri';
+      tri.textContent = '▶';
+      a.appendChild(tri);
+      a.appendChild(document.createTextNode(label));
+      return a;
     }
 
     function stateBlock(withSpinner, msg) {
