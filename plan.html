@@ -811,15 +811,17 @@
 
       const DAY_ADDITIONS = {
         1: { chinese: ["校内作业"], math: ["小学霸", "校内作业"], english: ["校内作业"] },
-        2: { chinese: ["阅读题", "校内作业"], math: ["校内作业"], english: ["阅读题", "校内作业"] },
+        2: { chinese: ["阅读题", "校内作业"], math: ["校内作业"], english: ["校内作业"] },
         3: { chinese: ["校内作业"], math: ["小学霸", "校内作业"], english: ["校内作业", "momo作业"] },
         4: { chinese: ["阅读题", "校内作业"], math: ["校内作业"], english: ["校内作业"] },
         5: {},
-        6: { chinese: ["校内作业"], math: ["大学霸", "校内作业"], english: ["校内作业"] },
+        6: { chinese: ["校内作业"], math: ["大学霸", "校内作业"], english: ["阅读题", "校内作业"] },
         0: { chinese: [], math: ["明心数学"], english: ["阅读题"] }
       };
 
       const NO_HANDWRITING_DAYS = new Set([5, 6, 0]);
+      // 周六、周日不安排 momo 打卡
+      const NO_MOMO_DAYS = new Set([6, 0]);
       const EVERYDAY_TASKS = new Set(["默写一页纸", "口算", "听力", "momo打卡"]);
 
       const els = {
@@ -855,9 +857,12 @@
         const additions = DAY_ADDITIONS[jsDay] || {};
         const tasks = [];
         SUBJECT_ORDER.forEach((subject) => {
-          const base = subject === "handwriting" && NO_HANDWRITING_DAYS.has(jsDay)
+          let base = subject === "handwriting" && NO_HANDWRITING_DAYS.has(jsDay)
             ? []
             : BASE_TASKS[subject];
+          if (subject === "english" && NO_MOMO_DAYS.has(jsDay)) {
+            base = base.filter((label) => label !== "momo打卡");
+          }
           [...base, ...(additions[subject] || [])].forEach((label) => {
             const tone = EVERYDAY_TASKS.has(label) ? "daily" : label === "校内作业" ? "school" : "";
             tasks.push({ subject, label, tone });
