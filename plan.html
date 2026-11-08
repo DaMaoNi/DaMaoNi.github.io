@@ -740,12 +740,12 @@
 
       const DAY_ADDITIONS = {
         1: { chinese: ["校内作业"], math: ["小学霸", "校内作业"], english: ["校内作业"] },
-        2: { chinese: ["阅读题", "校内作业"], math: ["校内作业"], english: ["校内作业"] },
+        2: { chinese: ["阅读题", "校内作业"], math: ["校内作业"], english: ["阅读题", "校内作业"] },
         3: { chinese: ["校内作业"], math: ["小学霸", "校内作业"], english: ["校内作业", "momo作业"] },
-        4: { chinese: ["阅读题", "校内作业"], math: ["校内作业"], english: ["校内作业"] },
+        4: { chinese: ["阅读题", "校内作业"], math: ["校内作业"], english: ["阅读题", "校内作业"] },
         5: {},
-        6: { chinese: ["校内作业"], math: ["大学霸", "校内作业"], english: ["阅读题", "校内作业"] },
-        0: { chinese: [], math: ["明心数学"], english: ["阅读题"] }
+        6: { chinese: ["校内作业"], math: ["大学霸", "校内作业"], english: ["英语试卷", "校内作业"] },
+        0: { chinese: ["语文试卷"], math: ["明心数学"] }
       };
 
       const NO_HANDWRITING_DAYS = new Set([5, 6, 0]);
@@ -764,6 +764,8 @@
         "小学霸": { accent: "#4f7fd0", ink: "#3560a8" },
         "大学霸": { accent: "#2f5fa8", ink: "#24497f" },
         "阅读题": { accent: "#d97b29", ink: "#a1550f" },
+        "英语试卷": { accent: "#4a5fae", ink: "#354687" },
+        "语文试卷": { accent: "#a34a6b", ink: "#7d3550" },
         "明心数学": { accent: "#2b8fa3", ink: "#1c6d7d" }
       };
 
