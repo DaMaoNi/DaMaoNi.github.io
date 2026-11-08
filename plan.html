@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f2ede3">
+  <title>小小学习表 · 周一至周日</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%231f4a3a'/%3E%3Cpath d='M28 52l15 15 30-35' fill='none' stroke='%23f0c464' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #f2ede3;
+      --surface: #fffdf8;
+      --ink: #1e2b24;
+      --ink-2: #3b493f;
+      --muted: #7d867f;
+      --line: #e6ddcc;
+      --green: #1f4a3a;
+      --gold: #e6a92c;
+      --gold-ink: #7a4e00;
+      --red: #c1402c;
+      --shadow: 0 12px 30px rgba(50, 58, 47, .06);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      background: var(--bg);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-width: 300px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% -8%, rgba(233, 190, 110, .22), transparent 26rem),
+        radial-gradient(circle at 96% 2%, rgba(88, 140, 113, .13), transparent 26rem),
+        var(--bg);
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", "Heiti SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .page {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 24px 0 36px;
+    }
+
+    /* ---------- Top bar ---------- */
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      color: #fff8e6;
+      background: linear-gradient(150deg, #2b6150, var(--green));
+      box-shadow: 0 7px 16px rgba(31, 74, 58, .22);
+    }
+
+    .brand-mark svg { width: 20px; height: 20px; }
+
+    .brand-text { display: flex; flex-direction: column; min-width: 0; }
+
+    .brand-text strong {
+      font-size: 16px;
+      font-weight: 780;
+      letter-spacing: -.015em;
+      line-height: 1.2;
+    }
+
+    .brand-text small {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10.5px;
+      letter-spacing: .02em;
+    }
+
+    .topbar-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      text-align: right;
+    }
+
+    .meta-date {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meta-date #greeting { color: var(--ink-2); font-weight: 650; }
+
+    .meta-date i {
+      margin: 0 5px;
+      color: #b7bcb4;
+      font-style: normal;
+    }
+
+    .meta-clock {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: .02em;
+    }
+
+    .clock-label { display: inline-flex; align-items: center; gap: 5px; }
+
+    .clock-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #55a17a;
+      animation: pulse 2.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(85, 161, 122, .35); }
+      50% { box-shadow: 0 0 0 4px rgba(85, 161, 122, 0); }
+    }
+
+    .meta-clock time {
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 720;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .01em;
+    }
+
+    /* ---------- Layout ---------- */
+
+    .layout {
+      display: grid;
+      grid-template-columns: 322px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* ---------- Today panel ---------- */
+
+    .today {
+      position: sticky;
+      top: 16px;
+      padding: 18px;
+      border-radius: 18px;
+      color: #f6f1e3;
+      background:
+        radial-gradient(circle at 108% -10%, rgba(230, 169, 44, .22), transparent 58%),
+        linear-gradient(160deg, #275745, var(--green) 62%);
+      box-shadow: 0 16px 34px rgba(31, 74, 58, .2);
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: rgba(248, 219, 158, .78);
+      font-size: 9px;
+      font-weight: 650;
+      letter-spacing: .16em;
+    }
+
+    .today-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 7px;
+    }
+
+    .today-head h2 {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 0;
+      font-size: 22px;
+      font-weight: 760;
+      letter-spacing: -.015em;
+    }
+
+    .today-head h2 .today-date {
+      color: rgba(247, 240, 222, .55);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .01em;
+    }
+
+    .today-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      color: #4a3204;
+      background: linear-gradient(150deg, #f7d488, #eab33f);
+      box-shadow: 0 8px 18px rgba(230, 169, 44, .26), inset 0 1px 0 rgba(255, 255, 255, .5);
+    }
+
+    .today-badge strong {
+      font-size: 21px;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .today-badge span {
+      margin-top: 2px;
+      font-size: 8px;
+      font-weight: 650;
+      letter-spacing: .06em;
+      opacity: .72;
+    }
+
+    .today-list { margin-top: 12px; }
+
+    .today-group {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      align-items: start;
+      gap: 8px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(255, 255, 255, .09);
+    }
+
+    .today-group:first-child { border-top: 0; padding-top: 2px; }
+
+    .tg-label {
+      padding: 2px 0;
+      border-radius: 5px;
+      color: var(--c);
+      background: var(--pale);
+      font-size: 9.5px;
+      font-weight: 800;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .tg-tasks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .tg-task {
+      padding: 3px 7px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: #ece7d9;
+      background: rgba(255, 255, 255, .07);
+      font-size: 11.5px;
+      font-weight: 520;
+      line-height: 1.28;
+    }
+
+    .tg-task.is-daily {
+      border-color: rgba(246, 203, 106, .32);
+      color: #ffd88c;
+      background: rgba(233, 178, 56, .16);
+      font-weight: 650;
+    }
+
+    .tg-task.is-school {
+      border-color: rgba(255, 150, 128, .28);
+      color: #ffb3a3;
+      background: rgba(226, 91, 65, .16);
+      font-weight: 650;
+    }
+
+    .panel-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 12px;
+      padding: 0;
+      border: 0;
+      color: rgba(255, 244, 214, .58);
+      background: none;
+      font-size: 10.5px;
+      cursor: pointer;
+      transition: color .18s ease;
+    }
+
+    .panel-link:hover { color: #ffdf9e; }
+
+    .panel-link:focus-visible {
+      outline: 2px solid #f3c964;
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    .panel-link svg { width: 11px; height: 11px; }
+
+    /* ---------- Week panel ---------- */
+
+    .week {
+      padding: 16px 18px 8px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .week-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 18px;
+      flex-wrap: wrap;
+    }
+
+    .week-title {
+      display: flex;
+      align-items: baseline;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .week-title h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 780;
+      letter-spacing: -.025em;
+    }
+
+    .week-title span {
+      color: var(--muted);
+      font-size: 10.5px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .legend-item i {
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+    }
+
+    .legend-item.is-daily i { background: #d99d16; }
+    .legend-item.is-school i { background: #cf4a33; }
+
+    .matrix {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .matrix-head,
+    .week-row {
+      display: grid;
+      grid-template-columns: 92px repeat(4, minmax(0, 1fr));
+    }
+
+    .matrix-head {
+      background: #f7f3e9;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .matrix-head > div {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 10px;
+      color: #8a9189;
+      font-size: 10px;
+      font-weight: 650;
+      letter-spacing: .06em;
+    }
+
+    .matrix-head .col-subj i {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--c);
+    }
+
+    .week-row + .week-row { border-top: 1px solid var(--line); }
+
+    .week-row {
+      transition: background .16s ease;
+    }
+
+    .week-row:hover:not(.is-today) { background: #faf7ef; }
+
+    .week-row.is-today {
+      background: linear-gradient(90deg, rgba(233, 181, 66, .16), rgba(233, 181, 66, .05) 55%, rgba(233, 181, 66, .02));
+      box-shadow: inset 3px 0 0 var(--gold);
+    }
+
+    .cell-day {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 10px;
+    }
+
+    .day-main { display: flex; flex-direction: column; min-width: 0; }
+
+    .day-name {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--ink);
+      font-size: 12.5px;
+      font-weight: 700;
+      line-height: 1.25;
+      white-space: nowrap;
+    }
+
+    .week-row.is-today .day-name { color: #8a5500; }
+
+    .today-pill {
+      padding: 1px 4px;
+      border-radius: 4px;
+      color: #5b3b00;
+      background: #f3c964;
+      font-size: 8px;
+      font-style: normal;
+      font-weight: 750;
+      letter-spacing: .02em;
+      line-height: 1.4;
+    }
+
+    .day-date {
+      margin-top: 1px;
+      color: var(--muted);
+      font-size: 9.5px;
+      line-height: 1.3;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .day-count {
+      flex: 0 0 auto;
+      margin-top: 1px;
+      padding: 1px 5px;
+      border-radius: 999px;
+      color: #949b93;
+      background: rgba(236, 230, 217, .72);
+      font-size: 8.5px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.5;
+    }
+
+    .week-row.is-today .day-count {
+      color: #8a5a0e;
+      background: rgba(233, 181, 66, .24);
+    }
+
+    .cell-subj {
+      min-width: 0;
+      padding: 9px 10px;
+      border-left: 1px solid #f1ebdd;
+    }
+
+    .cell-tasks {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .cell-none {
+      color: #c9c5b9;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .task {
+      display: flex;
+      align-items: flex-start;
+      gap: 5px;
+      min-width: 0;
+      color: var(--ink-2);
+      font-size: 11.5px;
+      font-weight: 500;
+      line-height: 1.42;
+    }
+
+    .task-dot {
+      flex: 0 0 auto;
+      width: 4px;
+      height: 4px;
+      margin-top: 6px;
+      border-radius: 50%;
+      background: var(--c, #9aa39b);
+      opacity: .6;
+    }
+
+    .task-label {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .task.is-daily { color: var(--gold-ink); font-weight: 650; }
+
+    .task.is-daily .task-dot {
+      background: #d99d16;
+      opacity: 1;
+    }
+
+    .task.is-daily .task-label {
+      background: linear-gradient(transparent 30%, rgba(246, 195, 72, .6) 30%);
+      border-radius: 2px;
+    }
+
+    .task.is-school { color: #bd3f2b; font-weight: 650; }
+
+    .task.is-school .task-dot {
+      background: #cf4a33;
+      opacity: 1;
+    }
+
+    /* ---------- Footer ---------- */
+
+    .page-foot {
+      margin: 14px 2px 0;
+      color: #98a097;
+      font-size: 10px;
+      text-align: right;
+      letter-spacing: .01em;
+    }
+
+    /* ---------- Responsive ---------- */
+
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .today { position: static; }
+      .today-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 20px;
+        margin-top: 10px;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .page { width: calc(100% - 28px); padding: 16px 0 28px; }
+      .topbar { margin-bottom: 14px; gap: 12px; }
+      .brand-mark { width: 34px; height: 34px; border-radius: 10px; }
+      .brand-mark svg { width: 18px; height: 18px; }
+      .brand-text strong { font-size: 15px; }
+      .brand-text small { display: none; }
+      .meta-date { font-size: 11px; }
+      .meta-clock time { font-size: 14px; }
+
+      .today { padding: 16px; border-radius: 16px; }
+      .today-head h2 { font-size: 20px; }
+      .today-badge { width: 50px; height: 50px; }
+      .today-badge strong { font-size: 19px; }
+      .today-list { grid-template-columns: minmax(0, 1fr); }
+
+      .week { padding: 14px 13px 6px; border-radius: 16px; }
+      .week-title h2 { font-size: 16px; }
+      .legend { gap: 10px; }
+
+      .matrix { border: 0; border-radius: 0; margin-top: 10px; }
+      .matrix-head { display: none; }
+      .matrix-body { display: grid; gap: 9px; }
+
+      .week-row {
+        display: block;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+
+      .week-row + .week-row { border-top: 1px solid var(--line); }
+
+      .week-row:hover:not(.is-today) { background: var(--surface); }
+
+      .week-row.is-today {
+        border-color: rgba(230, 169, 44, .5);
+        box-shadow: 0 0 0 1px rgba(230, 169, 44, .45), 0 8px 20px rgba(230, 169, 44, .12);
+      }
+
+      .cell-day {
+        align-items: center;
+        padding: 9px 12px;
+        background: #f8f4e9;
+      }
+
+      .week-row.is-today .cell-day { background: rgba(246, 224, 170, .45); }
+
+      .day-main {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 6px;
+      }
+
+      .day-name { font-size: 13px; }
+      .day-date { margin-top: 0; font-size: 10px; }
+
+      .cell-subj {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr);
+        gap: 8px;
+        padding: 7px 12px;
+        border-left: 0;
+        border-top: 1px dashed #efe7d7;
+      }
+
+      .cell-subj::before {
+        content: attr(data-label);
+        padding-top: 1px;
+        color: var(--c);
+        font-size: 10.5px;
+        font-weight: 700;
+        line-height: 1.5;
+      }
+
+      .cell-subj.is-empty { display: none; }
+
+      .cell-tasks { gap: 3px; }
+      .task { font-size: 12px; line-height: 1.4; }
+      .cell-none { display: none; }
+    }
+
+    @media (max-width: 400px) {
+      .page { width: calc(100% - 22px); }
+      .eyebrow { letter-spacing: .1em; }
+      .today-head h2 { font-size: 19px; }
+      .today-badge { width: 46px; height: 46px; }
+      .today-badge strong { font-size: 18px; }
+      .tg-task { font-size: 11px; padding: 3px 6px; }
+      .week { padding: 13px 10px 5px; }
+      .week-title { gap: 7px; }
+      .week-title span { font-size: 9.5px; }
+      .legend-item { font-size: 9.5px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+      }
+    }
+
+    @media print {
+      @page { size: A4 landscape; margin: 8mm; }
+
+      body {
+        background: #fff;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .page { width: 100%; padding: 0; }
+      .topbar, .today, .page-foot { display: none !important; }
+      .layout { display: block; }
+      .week { width: 100%; padding: 0; border: 0; box-shadow: none; }
+      .matrix { margin-top: 8px; }
+      .matrix-head,
+      .week-row { grid-template-columns: 76px repeat(4, minmax(0, 1fr)); }
+      .matrix-head > div { padding: 5px 6px; font-size: 8.5px; }
+      .cell-day { padding: 6px; }
+      .day-name { font-size: 10.5px; }
+      .day-date, .day-count { font-size: 7.5px; }
+      .cell-subj { padding: 6px; }
+      .task { font-size: 8.5px; line-height: 1.35; }
+      .task-dot { width: 3px; height: 3px; margin-top: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m5 12.5 4.2 4.2L19 6.6"></path>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong>小小学习表</strong>
+          <small>每天进步一点点</small>
+        </span>
+      </div>
+
+      <div class="topbar-meta">
+        <p class="meta-date">
+          <span id="greeting">下午好</span><i>·</i><span id="heroDate">加载中…</span>
+        </p>
+        <p class="meta-clock" title="以北京时间为准（UTC+8）">
+          <span class="clock-label"><i class="clock-dot" aria-hidden="true"></i>北京时间</span>
+          <time id="clockTime" aria-label="当前北京时间">--:--:--</time>
+        </p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="today" aria-labelledby="todayTitle">
+        <p class="eyebrow">TODAY · 今日任务</p>
+        <div class="today-head">
+          <h2 id="todayTitle">
+            <span id="todayWeekday">周日</span>
+            <span class="today-date" id="todayDate"></span>
+          </h2>
+          <div class="today-badge">
+            <strong id="todayTaskCount">0</strong>
+            <span>项</span>
+          </div>
+        </div>
+
+        <div class="today-list" id="todayChips" aria-label="今日任务"></div>
+
+        <button class="panel-link" id="jumpToday" type="button">
+          查看本周安排
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5v14M6.5 13.5 12 19l5.5-5.5"></path>
+          </svg>
+        </button>
+      </aside>
+
+      <main class="week" aria-labelledby="weekTitle">
+        <div class="week-head">
+          <div class="week-title">
+            <h2 id="weekTitle">本周安排</h2>
+            <span id="weekRange"></span>
+          </div>
+          <div class="legend" aria-label="颜色说明">
+            <span class="legend-item is-daily"><i aria-hidden="true"></i>每日必做</span>
+            <span class="legend-item is-school"><i aria-hidden="true"></i>校内作业</span>
+          </div>
+        </div>
+
+        <div id="weekGrid"></div>
+      </main>
+    </div>
+
+    <p class="page-foot">按北京时间显示 · 当天自动高亮</p>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const WEEKDAYS = [
+        { name: "周一", jsDay: 1 },
+        { name: "周二", jsDay: 2 },
+        { name: "周三", jsDay: 3 },
+        { name: "周四", jsDay: 4 },
+        { name: "周五", jsDay: 5 },
+        { name: "周六", jsDay: 6 },
+        { name: "周日", jsDay: 0 }
+      ];
+
+      const SUBJECT_ORDER = ["chinese", "math", "english", "handwriting"];
+
+      const SUBJECTS = {
+        chinese: { name: "语文", color: "#c25a3c", pale: "#faebe4" },
+        math: { name: "数学", color: "#3a70ba", pale: "#e9f0fb" },
+        english: { name: "英语", color: "#27836d", pale: "#e4f4ef" },
+        handwriting: { name: "练字", color: "#7c5cba", pale: "#f0eafa" }
+      };
+
+      const BASE_TASKS = {
+        chinese: ["默写一页纸"],
+        math: ["口算"],
+        english: ["听力", "momo打卡"],
+        handwriting: ["练字一篇"]
+      };
+
+      const DAY_ADDITIONS = {
+        1: { chinese: ["校内作业"], math: ["小学霸", "校内作业"], english: ["校内作业"] },
+        2: { chinese: ["阅读题", "校内作业"], math: ["校内作业"], english: ["阅读题", "校内作业"] },
+        3: { chinese: ["校内作业"], math: ["小学霸", "校内作业"], english: ["校内作业", "momo作业"] },
+        4: { chinese: ["阅读题", "校内作业"], math: ["校内作业"], english: ["校内作业"] },
+        5: {},
+        6: { chinese: ["校内作业"], math: ["大学霸", "校内作业"], english: ["校内作业"] },
+        0: { chinese: [], math: ["明心数学"], english: ["阅读题"] }
+      };
+
+      const NO_HANDWRITING_DAYS = new Set([5, 6, 0]);
+      const EVERYDAY_TASKS = new Set(["默写一页纸", "口算", "听力", "momo打卡"]);
+
+      const els = {
+        clock: document.getElementById("clockTime"),
+        greeting: document.getElementById("greeting"),
+        heroDate: document.getElementById("heroDate"),
+        todayWeekday: document.getElementById("todayWeekday"),
+        todayDate: document.getElementById("todayDate"),
+        todayChips: document.getElementById("todayChips"),
+        todayTaskCount: document.getElementById("todayTaskCount"),
+        weekRange: document.getElementById("weekRange"),
+        weekGrid: document.getElementById("weekGrid"),
+        jumpToday: document.getElementById("jumpToday")
+      };
+
+      let week = null;
+
+      function pad2(value) {
+        return String(value).padStart(2, "0");
+      }
+
+      // 北京时间为 UTC+8，且没有夏令时。把时间整体平移 8 小时后，
+      // 使用 UTC 取值，就能得到稳定的北京时间，不受设备时区影响。
+      function beijingNow() {
+        return new Date(Date.now() + 8 * 60 * 60 * 1000);
+      }
+
+      function dateKeyOf(date) {
+        return `${date.getUTCFullYear()}-${pad2(date.getUTCMonth() + 1)}-${pad2(date.getUTCDate())}`;
+      }
+
+      function getTasksFor(jsDay) {
+        const additions = DAY_ADDITIONS[jsDay] || {};
+        const tasks = [];
+        SUBJECT_ORDER.forEach((subject) => {
+          const base = subject === "handwriting" && NO_HANDWRITING_DAYS.has(jsDay)
+            ? []
+            : BASE_TASKS[subject];
+          [...base, ...(additions[subject] || [])].forEach((label) => {
+            const tone = EVERYDAY_TASKS.has(label) ? "daily" : label === "校内作业" ? "school" : "";
+            tasks.push({ subject, label, tone });
+          });
+        });
+        return tasks;
+      }
+
+      function buildWeek() {
+        const bj = beijingNow();
+        const year = bj.getUTCFullYear();
+        const month = bj.getUTCMonth();
+        const date = bj.getUTCDate();
+        const todayIndex = (bj.getUTCDay() + 6) % 7;
+
+        const days = WEEKDAYS.map((weekday, index) => {
+          const dayDate = new Date(Date.UTC(year, month, date - todayIndex + index));
+          const dayMonth = dayDate.getUTCMonth() + 1;
+          const dayNumber = dayDate.getUTCDate();
+          return {
+            index,
+            weekday: weekday.name,
+            jsDay: weekday.jsDay,
+            dateKey: dateKeyOf(dayDate),
+            dateLabel: `${dayMonth}月${dayNumber}日`,
+            fullDate: `${dayDate.getUTCFullYear()}年${dayMonth}月${dayNumber}日`,
+            tasks: getTasksFor(weekday.jsDay),
+            isToday: index === todayIndex
+          };
+        });
+
+        const today = days[todayIndex];
+        const start = days[0];
+        const end = days[6];
+
+        return {
+          days,
+          today,
+          todayIndex,
+          todayDateKey: today.dateKey,
+          weekRange: `${start.dateLabel} — ${end.dateLabel}`
+        };
+      }
+
+      function getGreeting(hour) {
+        if (hour < 5) return "夜深了";
+        if (hour < 11) return "早上好";
+        if (hour < 13) return "中午好";
+        if (hour < 18) return "下午好";
+        return "晚上好";
+      }
+
+      function taskTemplate(task) {
+        return `
+          <span class="task${task.tone ? ` is-${task.tone}` : ""}" style="--c:${SUBJECTS[task.subject].color}">
+            <i class="task-dot" aria-hidden="true"></i>
+            <span class="task-label">${task.label}</span>
+          </span>`;
+      }
+
+      function renderHeader() {
+        els.greeting.textContent = getGreeting(beijingNow().getUTCHours());
+        els.heroDate.textContent = week.today.fullDate;
+        els.todayWeekday.textContent = week.today.weekday;
+        els.todayDate.textContent = week.today.dateLabel;
+        els.todayTaskCount.textContent = String(week.today.tasks.length);
+        els.weekRange.textContent = week.weekRange;
+      }
+
+      function renderToday() {
+        els.todayChips.innerHTML = SUBJECT_ORDER.map((key) => {
+          const subject = SUBJECTS[key];
+          const tasks = week.today.tasks.filter((task) => task.subject === key);
+          if (!tasks.length) return "";
+          return `
+            <div class="today-group">
+              <span class="tg-label" style="--c:${subject.color};--pale:${subject.pale}">${subject.name}</span>
+              <div class="tg-tasks">
+                ${tasks.map((task) => `<span class="tg-task${task.tone ? ` is-${task.tone}` : ""}">${task.label}</span>`).join("")}
+              </div>
+            </div>`;
+        }).join("");
+      }
+
+      function renderWeek() {
+        const head = `
+          <div class="matrix-head" aria-hidden="true">
+            <div class="col-day">星期</div>
+            ${SUBJECT_ORDER.map((key) => {
+              const subject = SUBJECTS[key];
+              return `<div class="col-subj" style="--c:${subject.color}"><i></i>${subject.name}</div>`;
+            }).join("")}
+          </div>`;
+
+        const rows = week.days.map((day) => {
+          const cells = SUBJECT_ORDER.map((key) => {
+            const subject = SUBJECTS[key];
+            const tasks = day.tasks.filter((task) => task.subject === key);
+            return `
+              <div class="cell-subj${tasks.length ? "" : " is-empty"}" data-label="${subject.name}" style="--c:${subject.color}">
+                <div class="cell-tasks">
+                  ${tasks.length ? tasks.map(taskTemplate).join("") : '<span class="cell-none">—</span>'}
+                </div>
+              </div>`;
+          }).join("");
+
+          return `
+            <div class="week-row${day.isToday ? " is-today" : ""}" data-day="${day.dateKey}">
+              <div class="cell-day">
+                <div class="day-main">
+                  <span class="day-name">${day.weekday}${day.isToday ? '<em class="today-pill">今天</em>' : ""}</span>
+                  <span class="day-date">${day.dateLabel}</span>
+                </div>
+                <span class="day-count" aria-label="${day.tasks.length} 项">${day.tasks.length}</span>
+              </div>
+              ${cells}
+            </div>`;
+        }).join("");
+
+        els.weekGrid.innerHTML = `<div class="matrix">${head}<div class="matrix-body">${rows}</div></div>`;
+      }
+
+      function renderAll() {
+        week = buildWeek();
+        renderHeader();
+        renderToday();
+        renderWeek();
+      }
+
+      function tickClock() {
+        const bj = beijingNow();
+        const timeText = `${pad2(bj.getUTCHours())}:${pad2(bj.getUTCMinutes())}:${pad2(bj.getUTCSeconds())}`;
+        els.clock.textContent = timeText;
+        els.clock.dateTime = `${dateKeyOf(bj)}T${timeText}+08:00`;
+
+        const greeting = getGreeting(bj.getUTCHours());
+        if (els.greeting.textContent !== greeting) els.greeting.textContent = greeting;
+
+        if (week && dateKeyOf(bj) !== week.todayDateKey) {
+          renderAll();
+        }
+      }
+
+      els.jumpToday.addEventListener("click", () => {
+        const target = els.weekGrid.querySelector(".week-row.is-today");
+        if (!target) return;
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+      });
+
+      renderAll();
+      tickClock();
+      window.setInterval(tickClock, 1000);
+    })();
+  </script>
+</body>
+</html>
