@@ -751,6 +751,8 @@
       const NO_HANDWRITING_DAYS = new Set([5, 6, 0]);
       // 周六、周日不安排 momo 打卡
       const NO_MOMO_DAYS = new Set([6, 0]);
+      // 周日不安排默写
+      const NO_DICTATION_DAYS = new Set([0]);
 
       // 不再单独高亮「每日必做 / 校内作业」：相同任务共用同一套底色
       const TASK_STYLES = {
@@ -809,6 +811,9 @@
             : BASE_TASKS[subject];
           if (subject === "english" && NO_MOMO_DAYS.has(jsDay)) {
             base = base.filter((label) => label !== "momo打卡");
+          }
+          if (subject === "chinese" && NO_DICTATION_DAYS.has(jsDay)) {
+            base = base.filter((label) => label !== "默写一页纸");
           }
           [...base, ...(additions[subject] || [])].forEach((label) => {
             tasks.push({ subject, label });
